@@ -1,0 +1,36 @@
+[
+  {
+    "id": "9d51fd3d-d42f-4729-818a-57648e8c7f95",
+    "libro": "El Nombre de la Rosa",
+    "autorLibro": "Umberto Eco",
+    "nombre": "Mateo Silva",
+    "email": "mateo.silva@correo.com",
+    "genero": "Misterio",
+    "fecha": "2026-10-12",
+    "calificacion": 5,
+    "descripcion": "Una apasionante novela de misterio eclesistico en una abada benedictina del siglo XIV.",
+    "createdAt": "2026-10-13T00:46:41.486Z"
+  },
+  {
+    "id": "e4b2a8d3-52f1-4c28-98e6-7649d6824901",
+    "libro": "Cien años de soledad",
+    "autorLibro": "Gabriel García Márquez",
+    "nombre": "Ana Morales",
+    "email": "ana.morales@example.com",
+    "genero": "Ficción",
+    "fecha": "2026-10-10",
+    "calificacion": 5,
+    "descripcion": "Una obra cumbre de la literatura universal que retrata con maestría el realismo mágico a través de la estirpe Buendía."
+  },
+  {
+    "id": "7f8b1c4e-9d2a-4835-b1e7-a9f3458c2198",
+    "libro": "Hábitos Atómicos",
+    "autorLibro": "James Clear",
+    "nombre": "Roberto Vargas",
+    "email": "roberto.vargas@example.com",
+    "genero": "Desarrollo Personal",
+    "fecha": "2026-10-11",
+    "calificacion": 5,
+    "descripcion": "Estrategias prácticas y fundamentadas en psicología para construir hábitos sostenibles y eliminar rutinas improductivas."
+  }
+]
