@@ -8,10 +8,10 @@
 
 | N.° | Integrante | Rol Principal Asignado | Responsabilidad Técnica |
 |:---:|:---|:---|:---|
-| **1** | `[Nombre y Apellidos Estudiante 1]` | **Frontend Lead** | Arquitectura SPA, React Router, diseño de UI adaptable y estados visuales. |
-| **2** | `[Nombre y Apellidos Estudiante 2]` | **Backend Lead** | API REST en Express, endpoints, validación en servidor y persistencia JSON. |
-| **3** | `[Nombre y Apellidos Estudiante 3]` | **Integración & HTTP** | Servicios de consumo con Fetch/Axios, manejo de CORS, sincronización de estado. |
-| **4** | `[Nombre y Apellidos Estudiante 4]` | **Testing & Documentación** | Pruebas de borde, persistencia tras reinicio, informe PDF, guion y edición del video. |
+| **1** | **Danilo** | **Backend Lead** | API REST en Express, endpoints (`GET` y `POST /registros`), validación en servidor y persistencia JSON con `fs/promises`. |
+| **2** | **Darly** | **Forms & Validations** | Formulario controlado con `useState`, validaciones en tiempo real en cliente y componentes de alertas (`ReviewForm`, `AlertMessage`). |
+| **3** | **Francisco** | **Frontend Lead** | Enrutador SPA (`react-router-dom`), servicio `api.js` (Fetch API), catálogo con `useEffect`, buscador y filtros por género. |
+| **4** | **Gabriel** | **QA, UI & Documentación** | Componentes UI (`ReviewCard`, `Spinner`), pruebas de persistencia, auditoría de Git y redacción del informe PDF. |
 
 > ⚠️ **Nota de Coordinación y Exclusividad:**  
 > Este proyecto corresponde exclusivamente a la **Opción 6: Reseñas de libros**. Previo al desarrollo se verificó y reservó la exclusividad en la hoja de registro colaborativa del curso para garantizar que ningún otro grupo replique la misma temática ni proceso principal. En el informe final se incluye la captura de pantalla como evidencia.
@@ -260,10 +260,10 @@ cd Biblioinfo
 | N.° | Etapa del Video | Minutos Sugeridos | Responsable | Contenido a Demostrar en Grabación |
 |:---:|:---|:---:|:---|:---|
 | **1** | **Presentación** | 00:00 - 03:00 | *Todos los integrantes* | • Presentación de los 4 estudiantes.<br>• Explicación de la temática exclusiva (Reseñas de libros).<br>• Planteamiento del problema y solución de BiblioInfo.<br>• Muestra de la tabla de distribución de actividades. |
-| **2** | **Preparación del Entorno** | 03:00 - 06:00 | *Estudiante 4* | • Estructura de carpetas (`frontend/` y `backend/`).<br>• Explicación de `package.json`, librerías y `.gitignore`.<br>• Ejecución de comandos para iniciar backend y frontend en dos terminales. |
-| **3** | **Construcción del Frontend** | 06:00 - 11:00 | *Estudiante 1* | • Enrutador con `react-router-dom` (`/`, `/registro`, `/lista`).<br>• Componentes reutilizables (`ReviewForm`, `ReviewCard`, `Navbar`).<br>• Estado de React (`useState`, campos controlados).<br>• Validaciones en el cliente (email regex, fecha, requeridos) y mensajes visuales. |
-| **4** | **Construcción del Backend** | 11:00 - 16:00 | *Estudiante 2* | • Servidor Express, middleware `express.json()` y CORS.<br>• Rutas `GET /registros` y `POST /registros`.<br>• Lógica de validación en el servidor con códigos `400` y `201`.<br>• Asignación de ID único (`crypto.randomUUID()`).<br>• Lectura y escritura asíncrona segura en `reviews.json` (`fs/promises`). |
-| **5** | **Integración Frontend ↔ Backend** | 16:00 - 20:00 | *Estudiante 3* | • Servicio de conexión HTTP con `fetch`/`axios`.<br>• Configuración de la URL base del backend (`http://localhost:5000`).<br>• Envío del formulario con POST y obtención con GET.<br>• Actualización dinámica del estado y redirección a la lista. |
+| **2** | **Preparación del Entorno** | 03:00 - 06:00 | *Gabriel* | • Estructura de carpetas (`frontend/` y `backend/`).<br>• Explicación de `package.json`, librerías y `.gitignore`.<br>• Ejecución de comandos para iniciar backend y frontend en dos terminales. |
+| **3** | **Construcción del Frontend** | 06:00 - 11:00 | *Darly* | • Enrutador con `react-router-dom` (`/`, `/registro`, `/lista`).<br>• Componentes reutilizables (`ReviewForm`, `ReviewCard`, `Navbar`).<br>• Estado de React (`useState`, campos controlados).<br>• Validaciones en el cliente (email regex, fecha, requeridos) y mensajes visuales. |
+| **4** | **Construcción del Backend** | 11:00 - 16:00 | *Danilo* | • Servidor Express, middleware `express.json()` y CORS.<br>• Rutas `GET /registros` y `POST /registros`.<br>• Lógica de validación en el servidor con códigos `400` y `201`.<br>• Asignación de ID único (`crypto.randomUUID()`).<br>• Lectura y escritura asíncrona segura en `reviews.json` (`fs/promises`). |
+| **5** | **Integración Frontend ↔ Backend** | 16:00 - 20:00 | *Francisco* | • Servicio de conexión HTTP con `fetch`/`axios`.<br>• Configuración de la URL base del backend (`http://localhost:5000`).<br>• Envío del formulario con POST y obtención con GET.<br>• Actualización dinámica del estado y redirección a la lista. |
 | **6** | **Batería de Pruebas en Vivo** | 20:00 - 26:00 | *Todos los integrantes* | • **Prueba 1 (Éxito):** Registro de reseña válida y visualización inmediata en `/lista`.<br>• **Prueba 2 (Validación Cliente):** Intento con email inválido o campos vacíos.<br>• **Prueba 3 (Validación Servidor):** Petición defectuosa por Postman/ThunderClient recibiendo `400 Bad Request`.<br>• **Prueba 4 (Manejo de Estados):** Visualización de estado de carga y lista vacía.<br>• **Prueba 5 (Persistencia):** Reinicio total del servidor backend (`Ctrl+C` y reinicio) y recarga del frontend demostrando que los datos no se pierden. |
 | **7** | **Cierre y Conclusiones** | 26:00 - 30:00 | *Todos los integrantes* | • Resumen de logros y valor aportado por cada integrante.<br>• Retos técnicos encontrados (ej. manejo de CORS, concurrencia en JSON) y cómo se resolvieron.<br>• Muestra del repositorio Git con commits identificables de los 4 miembros. |
 
