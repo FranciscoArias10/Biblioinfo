@@ -3,7 +3,9 @@
  * Connects with Express Backend at http://localhost:5000/registros
  */
 
-const API_BASE_URL = 'http://localhost:5000/registros'
+const API_URL = 'http://localhost:5000/registros'
+export const API_BASE_URL = API_URL
+export { API_URL }
 
 // Initial fallback reviews ensuring the UI always has rich, beautiful content
 export const INITIAL_REVIEWS = [
@@ -155,14 +157,14 @@ export const INITIAL_REVIEWS = [
 
 /**
  * Consulta todas las reseñas registradas en el backend (con filtro opcional de género).
- * @param {string} genero Filtro opcional por género
+ * @param {string} [genero] Filtro opcional por género
  * @returns {Promise<Array>} Listado de reseñas
  */
 export async function getReviews(genero = '') {
   try {
     const url = genero
-      ? `${API_BASE_URL}?genero=${encodeURIComponent(genero)}`
-      : API_BASE_URL
+      ? `${API_URL}?genero=${encodeURIComponent(genero)}`
+      : API_URL
 
     const response = await fetch(url, {
       method: 'GET',
@@ -173,7 +175,7 @@ export async function getReviews(genero = '') {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
-      throw new Error(errorData.message || `Error del servidor: código ${response.status}`)
+      throw new Error(errorData.message || `Error del servidor (${response.status})`)
     }
 
     const data = await response.json()
@@ -201,13 +203,13 @@ export async function getReviews(genero = '') {
 }
 
 /**
- * Envía una nueva reseña al servidor para su persistencia en reviews.json.
+ * Envía una nueva reseña literaria al servidor para su persistencia en reviews.json.
  * @param {Object} reviewData Datos de la reseña
- * @returns {Promise<Object>} Reseña guardada con su ID generado
+ * @returns {Promise<Object>} Reseña guardada confirmada por el servidor
  */
 export async function createReview(reviewData) {
   try {
-    const response = await fetch(API_BASE_URL, {
+    const response = await fetch(API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -216,12 +218,14 @@ export async function createReview(reviewData) {
       body: JSON.stringify(reviewData),
     })
 
-    const result = await response.json().catch(() => ({}))
+    const data = await response.json().catch(() => ({}))
 
     if (!response.ok) {
-      const error = new Error(result.message || 'Error al procesar la reseña en el servidor.')
-      error.details = result.errors || []
+      // El backend devuelve { success: false, message: '...', errors: [...] } con status 400 o 500
+      const error = new Error(data.message || 'Error al procesar la reseña en el servidor.')
       error.status = response.status
+      error.errors = data.errors || [data.message || 'Error desconocido']
+      error.details = error.errors
       throw error
     }
 
@@ -229,14 +233,14 @@ export async function createReview(reviewData) {
     try {
       const local = localStorage.getItem('biblioinfo_cached_reviews')
       const pool = local ? JSON.parse(local) : [...INITIAL_REVIEWS]
-      const savedReview = result.review || result.data || reviewData
+      const savedReview = data.review || data.data || reviewData
       pool.unshift(savedReview)
       localStorage.setItem('biblioinfo_cached_reviews', JSON.stringify(pool))
     } catch {
       // Ignore localStorage quotas
     }
 
-    return result
+    return data
   } catch (error) {
     if (error.status) {
       // Re-throw API validation errors so ReviewForm displays them
@@ -265,6 +269,7 @@ export async function createReview(reviewData) {
         data: newEntry,
       }
     }
+    console.error('[API createReview] Error al enviar reseña:', error)
     throw error
   }
 }
