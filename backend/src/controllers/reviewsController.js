@@ -8,7 +8,13 @@ import { validateReview } from '../utils/validator.js';
  */
 export async function getReviews(req, res) {
   try {
-    const reviews = await readReviews();
+    // Las reseñas antiguas no tienen portada ni libroId: se completan con null
+    // para que el frontend siempre reciba los mismos campos.
+    const reviews = (await readReviews()).map((r) => ({
+      ...r,
+      portada: r.portada ?? null,
+      libroId: r.libroId ?? null
+    }));
 
     // Filtro opcional por género mediante query param (?genero=Ficcion)
     const { genero } = req.query;
@@ -59,6 +65,9 @@ export async function createReview(req, res) {
       fecha: reviewData.fecha.trim(),
       calificacion: Number(reviewData.calificacion) || 5,
       descripcion: reviewData.descripcion.trim(),
+      // Datos opcionales del catálogo externo de libros (null si el usuario escribió el libro a mano)
+      portada: optionalText(reviewData.portada),
+      libroId: optionalText(reviewData.libroId),
       createdAt: new Date().toISOString()
     };
 
@@ -78,4 +87,13 @@ export async function createReview(req, res) {
       error: error.message
     });
   }
+}
+
+/**
+ * Limpia un campo de texto opcional: devuelve el texto sin espacios o null si viene vacío.
+ * @param {unknown} value
+ * @returns {string|null}
+ */
+function optionalText(value) {
+  return typeof value === 'string' && value.trim() !== '' ? value.trim() : null;
 }

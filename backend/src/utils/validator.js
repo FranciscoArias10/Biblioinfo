@@ -23,7 +23,9 @@ export function validateReview(data) {
     genero,
     fecha,
     calificacion,
-    descripcion
+    descripcion,
+    portada,
+    libroId
   } = data;
 
   // Validación: Título del libro
@@ -74,6 +76,21 @@ export function validateReview(data) {
     errors.push('La descripción de la reseña es obligatoria y debe tener al menos 10 caracteres.');
   }
 
+  // Validación: Portada (opcional). Llega solo si el usuario eligió un libro del catálogo externo.
+  // Se guarda únicamente el enlace a la imagen, nunca la imagen en sí.
+  if (portada !== undefined && portada !== null && portada !== '') {
+    if (typeof portada !== 'string' || portada.trim().length > 500 || !isHttpsUrl(portada.trim())) {
+      errors.push('La portada debe ser un enlace https válido a una imagen.');
+    }
+  }
+
+  // Validación: Identificador del libro en el catálogo externo (opcional)
+  if (libroId !== undefined && libroId !== null && libroId !== '') {
+    if (typeof libroId !== 'string' || libroId.trim().length > 100) {
+      errors.push('El identificador del libro no es válido.');
+    }
+  }
+
   return {
     isValid: errors.length === 0,
     errors
@@ -90,4 +107,17 @@ function getLocalToday() {
   const month = String(now.getMonth() + 1).padStart(2, '0');
   const day = String(now.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
+}
+
+/**
+ * Comprueba que un texto sea un enlace https bien formado.
+ * @param {string} value
+ * @returns {boolean}
+ */
+function isHttpsUrl(value) {
+  try {
+    return new URL(value).protocol === 'https:';
+  } catch {
+    return false;
+  }
 }
