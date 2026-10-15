@@ -81,11 +81,15 @@ export default function BookDetail() {
     )
     const average = totalScore / matchedReviews.length
 
+    const reviewWithPortada = matchedReviews.find((r) => r.portada)
+    const portada = reviewWithPortada ? reviewWithPortada.portada : (first.portada || null)
+
     const palette = getBookPalette(title, genre)
     return {
       title,
       author,
       genre,
+      portada,
       bg: first.bg || palette.bg,
       fg: first.fg || palette.fg,
       averageRating: Number(average.toFixed(1)),
@@ -157,6 +161,7 @@ export default function BookDetail() {
                   title={bookData.title}
                   author={bookData.author}
                   genre={bookData.genre}
+                  portada={bookData.portada}
                   bg={bookData.bg}
                   fg={bookData.fg}
                   size="xl"
@@ -167,6 +172,7 @@ export default function BookDetail() {
                   title={bookData.title}
                   author={bookData.author}
                   genre={bookData.genre}
+                  portada={bookData.portada}
                   bg={bookData.bg}
                   fg={bookData.fg}
                   size="lg"

@@ -79,7 +79,7 @@ export function validateReview(data) {
   // Validación: Portada (opcional). Llega solo si el usuario eligió un libro del catálogo externo.
   // Se guarda únicamente el enlace a la imagen, nunca la imagen en sí.
   if (portada !== undefined && portada !== null && portada !== '') {
-    if (typeof portada !== 'string' || portada.trim().length > 500 || !isHttpsUrl(portada.trim())) {
+    if (typeof portada !== 'string' || portada.trim().length > 1500 || !isHttpsUrl(portada.trim())) {
       errors.push('La portada debe ser un enlace https válido a una imagen.');
     }
   }

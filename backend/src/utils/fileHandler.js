@@ -78,6 +78,37 @@ let writeQueue = Promise.resolve();
 export function addReview(review) {
   const task = writeQueue.then(async () => {
     const reviews = await readReviews();
+
+    // Sincronizar foto de portada entre todas las reseñas del mismo libro
+    if (review.libro && typeof review.libro === 'string') {
+      const normTitle = review.libro.trim().toLowerCase();
+
+      if (review.portada) {
+        // Caso A: La nueva reseña aporta una portada -> actualizar reseñas anteriores del libro que no la tengan
+        for (const r of reviews) {
+          if (r.libro && r.libro.trim().toLowerCase() === normTitle) {
+            if (!r.portada) {
+              r.portada = review.portada;
+            }
+            if (!r.libroId && review.libroId) {
+              r.libroId = review.libroId;
+            }
+          }
+        }
+      } else {
+        // Caso B: La nueva reseña no tiene portada -> heredar portada si el libro ya estaba registrado con una
+        const existingWithCover = reviews.find(
+          (r) => r.libro && r.libro.trim().toLowerCase() === normTitle && r.portada
+        );
+        if (existingWithCover) {
+          review.portada = existingWithCover.portada;
+          if (!review.libroId && existingWithCover.libroId) {
+            review.libroId = existingWithCover.libroId;
+          }
+        }
+      }
+    }
+
     reviews.unshift(review); // Las más recientes primero
     await writeReviews(reviews);
     return review;

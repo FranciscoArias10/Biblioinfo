@@ -1,5 +1,19 @@
 [
   {
+    "id": "78c72861-a43c-4834-91f8-e71591b0add6",
+    "libro": "Cien años de soledad",
+    "autorLibro": "Gabriel García Márquez",
+    "nombre": "Lector Beta",
+    "email": "beta@ejemplo.com",
+    "genero": "Ensayo",
+    "fecha": "2026-10-15",
+    "calificacion": 5,
+    "descripcion": "Una obra cumbre e inolvidable con una edicion visual maravillosa.",
+    "portada": "https://covers.openlibrary.org/b/id/12627383-M.jpg",
+    "libroId": "/works/OL274505W",
+    "createdAt": "2026-10-15T05:38:22.348Z"
+  },
+  {
     "id": "ab9b4576-7596-4db5-aeee-de13a43032ba",
     "libro": "Latidos que no dije",
     "autorLibro": "Roos",
@@ -51,8 +65,8 @@
     "fecha": "2026-10-10",
     "calificacion": 5,
     "descripcion": "Una obra cumbre de la literatura universal que retrata con maestría el realismo mágico a través de la estirpe Buendía.",
-    "portada": null,
-    "libroId": null,
+    "portada": "https://covers.openlibrary.org/b/id/12627383-M.jpg",
+    "libroId": "/works/OL274505W",
     "createdAt": "2026-10-10T14:20:00.000Z"
   },
   {
@@ -261,8 +275,8 @@
     "fecha": "2026-10-07",
     "calificacion": 4,
     "descripcion": "Una prosa deslumbrante con Macondo como epicentro. El árbol genealógico de los Buendía es una alegoría inolvidable de la soledad humana.",
-    "portada": null,
-    "libroId": null,
+    "portada": "https://covers.openlibrary.org/b/id/12627383-M.jpg",
+    "libroId": "/works/OL274505W",
     "createdAt": "2026-10-07T17:30:00.000Z"
   },
   {

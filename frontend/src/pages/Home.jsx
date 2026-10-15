@@ -329,6 +329,7 @@ export default function Home() {
                     <BookCover
                       title={c.title}
                       author={c.author}
+                      portada={c.portada}
                       bg={c.bg}
                       fg={c.fg}
                       size="md"

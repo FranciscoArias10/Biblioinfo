@@ -24,6 +24,8 @@ function groupReviewsByBook(reviewsList) {
         title: rawTitle,
         author: (r.autorLibro || r.author || r.bookAuthor || 'Autor desconocido').trim(),
         genre: r.genero || r.genre || 'Ficción',
+        portada: r.portada || null,
+        libroId: r.libroId || null,
         bg: r.bg || palette.bg,
         fg: r.fg || palette.fg,
         reviews: [],
@@ -36,6 +38,12 @@ function groupReviewsByBook(reviewsList) {
     }
     if ((!item.genre || item.genre === 'Ficción') && r.genero) {
       item.genre = r.genero
+    }
+    if (!item.portada && r.portada) {
+      item.portada = r.portada
+    }
+    if (!item.libroId && r.libroId) {
+      item.libroId = r.libroId
     }
     if (!item.bg && r.bg) item.bg = r.bg
     if (!item.fg && r.fg) item.fg = r.fg
@@ -348,6 +356,7 @@ export default function ReviewList() {
                     title={book.title}
                     author={book.author}
                     genre={book.genre}
+                    portada={book.portada}
                     bg={book.bg}
                     fg={book.fg}
                     size="lg"

@@ -38,6 +38,7 @@ export default function ReviewCard({
               title={title}
               author={author}
               genre={genre}
+              portada={review.portada}
               bg={bg}
               fg={fg}
               size="xs"

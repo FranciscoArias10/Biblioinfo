@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { getBookPalette } from '../utils/palette'
 
 /**
@@ -9,6 +10,7 @@ import { getBookPalette } from '../utils/palette'
  * @param {string} genre - Book Genre (used for palette if bg/fg not provided)
  * @param {string} bg - Custom background color
  * @param {string} fg - Custom foreground text color
+ * @param {string|null} portada - External book cover image URL (e.g. from Google Books)
  * @param {'xs'|'sm'|'md'|'lg'|'xl'} size - Size variant
  * @param {number} rotate - Degrees to rotate the book (e.g. -8, 5 for hero)
  * @param {string} count - Optional label under the book (e.g. "4.9 · 12 reseñas")
@@ -22,6 +24,7 @@ export default function BookCover({
   genre = '',
   bg,
   fg,
+  portada,
   size = 'md',
   rotate = 0,
   count,
@@ -30,6 +33,9 @@ export default function BookCover({
   className = '',
   style = {},
 }) {
+  const [failedPortada, setFailedPortada] = useState(null)
+  const showImage = Boolean(portada && failedPortada !== portada)
+
   // Determine colors
   const defaultColors = getBookPalette(title, genre)
   const bookBg = bg || defaultColors.bg
@@ -126,46 +132,62 @@ export default function BookCover({
         style={bookStyles}
         className="relative overflow-hidden select-none transition-shadow duration-300"
       >
+        {/* Photo Cover Image if provided by Google Books / Open Library */}
+        {showImage && (
+          <img
+            src={portada}
+            alt={title}
+            onError={() => setFailedPortada(portada)}
+            className="absolute inset-0 w-full h-full object-cover z-0"
+            loading="lazy"
+          />
+        )}
+
         {/* Subtle page-crease gradient overlay */}
         <div
           aria-hidden="true"
-          className="absolute inset-0 pointer-events-none"
+          className="absolute inset-0 pointer-events-none z-10"
           style={{
             background:
-              'linear-gradient(90deg, rgba(0,0,0,0.18) 0%, rgba(255,255,255,0.06) 6%, transparent 15%, transparent 95%, rgba(0,0,0,0.12) 100%)',
+              'linear-gradient(90deg, rgba(0,0,0,0.22) 0%, rgba(255,255,255,0.06) 6%, transparent 15%, transparent 95%, rgba(0,0,0,0.18) 100%)',
           }}
         />
 
-        {/* Author on top */}
-        {author && (
-          <span
-            style={{
-              fontSize: s.authorSize,
-              letterSpacing: '0.12em',
-              textTransform: 'uppercase',
-              opacity: 0.85,
-              fontWeight: 600,
-            }}
-            className="truncate font-sans relative z-10"
-            title={author}
-          >
-            {author}
-          </span>
-        )}
+        {/* Author & Title: Only rendered when no cover image is active */}
+        {!showImage && (
+          <>
+            {/* Author on top */}
+            {author && (
+              <span
+                style={{
+                  fontSize: s.authorSize,
+                  letterSpacing: '0.12em',
+                  textTransform: 'uppercase',
+                  opacity: 0.85,
+                  fontWeight: 600,
+                }}
+                className="truncate font-sans relative z-10"
+                title={author}
+              >
+                {author}
+              </span>
+            )}
 
-        {/* Title at bottom */}
-        <span
-          style={{
-            fontFamily: 'Merriweather, Georgia, serif',
-            fontWeight: 900,
-            fontSize: s.titleSize,
-            lineHeight: s.titleLineHeight,
-          }}
-          className="line-clamp-4 relative z-10 break-words"
-          title={title}
-        >
-          {title}
-        </span>
+            {/* Title at bottom */}
+            <span
+              style={{
+                fontFamily: 'Merriweather, Georgia, serif',
+                fontWeight: 900,
+                fontSize: s.titleSize,
+                lineHeight: s.titleLineHeight,
+              }}
+              className="line-clamp-4 relative z-10 break-words"
+              title={title}
+            >
+              {title}
+            </span>
+          </>
+        )}
       </div>
 
       {/* Optional Count / Review Label under the book */}

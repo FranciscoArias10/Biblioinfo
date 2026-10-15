@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import FormField from './form/FormField'
 import StarRating from './form/StarRating'
 import BookCoverPreview from './BookCoverPreview'
 import { GENRES_OPTIONS, validateField, validateReviewForm } from '../utils/reviewValidator'
+import { searchBooks } from '../services/bookSearch'
 
 export default function ReviewForm({
   onSubmit,
@@ -27,6 +28,27 @@ export default function ReviewForm({
   const [errors, setErrors] = useState({})
   const [touched, setTouched] = useState({})
 
+  // Estado para la búsqueda y autocompletado con Google Books
+  const [suggestions, setSuggestions] = useState([])
+  const [isSearching, setIsSearching] = useState(false)
+  const [showDropdown, setShowDropdown] = useState(false)
+  const searchTimeoutRef = useRef(null)
+  const dropdownRef = useRef(null)
+
+  // Cierra el menú desplegable al hacer clic fuera del componente
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setShowDropdown(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current)
+    }
+  }, [])
+
   const handleChange = (e) => {
     const { name, value } = e.target
     const updatedValue = name === 'calificacion' ? Number(value) : value
@@ -37,6 +59,87 @@ export default function ReviewForm({
       const errorMsg = validateField(name, updatedValue, today)
       setErrors((prev) => ({ ...prev, [name]: errorMsg }))
     }
+  }
+
+  // Manejador específico para el título del libro con búsqueda y autocompletado en Google Books
+  const handleLibroChange = (e) => {
+    const value = e.target.value
+
+    setFormData((prev) => ({
+      ...prev,
+      libro: value,
+      // Si el usuario vacía el campo, se desvincula la portada previa
+      portada: value.trim() ? prev.portada : null,
+      libroId: value.trim() ? prev.libroId : null,
+    }))
+
+    if (touched.libro) {
+      const errorMsg = validateField('libro', value, today)
+      setErrors((prev) => ({ ...prev, libro: errorMsg }))
+    }
+
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current)
+    }
+
+    if (!value || value.trim().length < 2) {
+      setSuggestions([])
+      setShowDropdown(false)
+      setIsSearching(false)
+      return
+    }
+
+    setIsSearching(true)
+    setShowDropdown(true)
+
+    searchTimeoutRef.current = setTimeout(async () => {
+      try {
+        const results = await searchBooks(value)
+        setSuggestions(results)
+        setShowDropdown(results.length > 0)
+      } catch (err) {
+        console.error('Error buscando libros:', err)
+        setSuggestions([])
+      } finally {
+        setIsSearching(false)
+      }
+    }, 320)
+  }
+
+  // Al seleccionar una coincidencia de la lista, se autocompleta título, autor, portada y género sugerido
+  const handleSelectBook = (book) => {
+    setFormData((prev) => {
+      const next = {
+        ...prev,
+        libro: book.title,
+        autorLibro: book.author || prev.autorLibro,
+        portada: book.cover || null,
+        libroId: book.id || null,
+      }
+      if (book.suggestedGenre && !prev.genero) {
+        next.genero = book.suggestedGenre
+      }
+      return next
+    })
+
+    setErrors((prev) => ({
+      ...prev,
+      libro: '',
+      autorLibro: book.author ? '' : prev.autorLibro,
+      genero: book.suggestedGenre ? '' : prev.genero,
+    }))
+
+    setShowDropdown(false)
+    setSuggestions([])
+  }
+
+  // Permite al usuario quitar la foto de portada y volver al diseño tipográfico
+  const handleRemoveCover = () => {
+    setFormData((prev) => ({
+      ...prev,
+      portada: null,
+      libroId: null,
+    }))
   }
 
   const handleBlur = (e) => {
@@ -86,18 +189,131 @@ export default function ReviewForm({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <FormField
-              label="Título del Libro"
-              name="libro"
-              value={formData.libro}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={errors.libro}
-              touched={touched.libro}
-              placeholder="Nombre completo de la obra"
-              disabled={isSubmitting}
-              hint="ej. Cien años de soledad"
-            />
+            {/* Título del Libro con Autocompletado de Google Books */}
+            <div className="relative flex flex-col gap-1.5 w-full" ref={dropdownRef}>
+              <div className="flex items-center justify-between gap-2 min-h-[22px]">
+                <label
+                  htmlFor="libro"
+                  className="text-sm font-bold text-paper-text dark:text-dark-text truncate flex items-center gap-2"
+                >
+                  <span>Título del Libro</span>
+                  <span className="text-accent">*</span>
+                  {formData.portada && (
+                    <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 flex items-center gap-1">
+                      <span>✓</span>
+                      <span>Portada vinculada</span>
+                    </span>
+                  )}
+                </label>
+                {isSearching ? (
+                  <span className="text-xs font-semibold text-accent flex items-center gap-1.5">
+                    <svg className="animate-spin h-3.5 w-3.5 text-accent" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    <span>Buscando libro...</span>
+                  </span>
+                ) : (
+                  <span className="text-xs font-normal text-paper-muted dark:text-dark-muted truncate">
+                    ej. Cien años de soledad
+                  </span>
+                )}
+              </div>
+
+              <div className="relative w-full">
+                <input
+                  type="text"
+                  id="libro"
+                  name="libro"
+                  value={formData.libro}
+                  onChange={handleLibroChange}
+                  onFocus={() => {
+                    if (suggestions.length > 0) setShowDropdown(true)
+                  }}
+                  onBlur={handleBlur}
+                  placeholder="Escribe el nombre del libro para buscar coincidencias..."
+                  disabled={isSubmitting}
+                  autoComplete="off"
+                  className={`w-full px-4 py-3 rounded-xl bg-paper-bg dark:bg-dark-bg border text-paper-text dark:text-dark-text placeholder:text-paper-muted/60 dark:placeholder:text-dark-muted/50 focus:outline-none focus:ring-2 transition-all ${
+                    errors.libro && touched.libro
+                      ? 'border-rose-500 focus:ring-rose-500/20'
+                      : 'border-paper-borderStrong dark:border-dark-border focus:border-accent focus:ring-accent/20'
+                  }`}
+                />
+
+                {/* Menú desplegable con coincidencias de Google Books */}
+                {showDropdown && suggestions.length > 0 && (
+                  <div className="absolute top-[calc(100%+6px)] left-0 right-0 z-50 bg-paper-surface dark:bg-dark-card border border-paper-borderStrong dark:border-dark-border rounded-2xl shadow-2xl overflow-hidden max-h-[360px] overflow-y-auto">
+                    <div className="p-2.5 bg-paper-band dark:bg-dark-surface/80 border-b border-paper-border dark:border-dark-border flex items-center justify-between text-xs font-bold text-paper-muted dark:text-dark-muted">
+                      <span>Coincidencias encontradas (haz clic para autocompletar)</span>
+                      <button
+                        type="button"
+                        onClick={() => setShowDropdown(false)}
+                        className="text-paper-muted hover:text-paper-text text-sm px-1.5 cursor-pointer"
+                        title="Cerrar sugerencias"
+                      >
+                        ✕
+                      </button>
+                    </div>
+
+                    <div className="divide-y divide-paper-border dark:divide-dark-border">
+                      {suggestions.map((item, idx) => (
+                        <button
+                          key={item.id || idx}
+                          type="button"
+                          onClick={() => handleSelectBook(item)}
+                          className="w-full p-3 flex items-center gap-3.5 hover:bg-accent/10 dark:hover:bg-accent/10 transition-colors text-left cursor-pointer group"
+                        >
+                          {/* Miniatura de portada */}
+                          <div className="w-10 h-14 rounded-md bg-paper-band dark:bg-dark-surface flex-shrink-0 overflow-hidden border border-paper-border dark:border-dark-border flex items-center justify-center shadow-xs">
+                            {item.cover ? (
+                              <img
+                                src={item.cover}
+                                alt={item.title}
+                                className="w-full h-full object-cover"
+                                loading="lazy"
+                              />
+                            ) : (
+                              <span className="text-base text-paper-muted select-none">📖</span>
+                            )}
+                          </div>
+
+                          {/* Datos del libro */}
+                          <div className="flex flex-col min-w-0 flex-1">
+                            <span className="font-serif font-black text-sm text-paper-text dark:text-dark-text truncate group-hover:text-accent transition-colors">
+                              {item.title}
+                            </span>
+                            <span className="text-xs text-paper-muted dark:text-dark-muted truncate">
+                              {item.author ? `Por ${item.author}` : 'Autor no especificado'}
+                            </span>
+                            {item.suggestedGenre && (
+                              <span className="inline-block mt-1 text-[10px] font-bold text-accent">
+                                Género: {item.suggestedGenre}
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="flex-shrink-0 text-accent font-bold text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                            <span>Autocompletar</span>
+                            <span>→</span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="p-2.5 bg-paper-band/50 dark:bg-dark-surface/40 text-[11px] text-paper-muted dark:text-dark-muted text-center border-t border-paper-border dark:border-dark-border">
+                      ¿No está en la lista? Puedes escribir el nombre y autor a mano normalmente.
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {errors.libro && touched.libro && (
+                <span className="text-xs text-rose-500 font-medium mt-0.5 leading-snug">
+                  {errors.libro}
+                </span>
+              )}
+            </div>
 
             <FormField
               label="Autor de la Obra"
@@ -287,6 +503,8 @@ export default function ReviewForm({
           autorLibro={formData.autorLibro}
           genero={formData.genero}
           calificacion={formData.calificacion}
+          portada={formData.portada}
+          onRemoveCover={handleRemoveCover}
         />
       </div>
     </div>

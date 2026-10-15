@@ -72,6 +72,8 @@ export default function BookCoverPreview({
   autorLibro = '',
   genero = '',
   calificacion = 0,
+  portada = null,
+  onRemoveCover = null,
 }) {
   const currentPalette = GENRE_PALETTES[genero] || DEFAULT_PALETTE
 
@@ -87,10 +89,15 @@ export default function BookCoverPreview({
       className="w-full max-w-[340px] bg-paper-surface dark:bg-[#181715] border border-paper-border dark:border-dark-border rounded-3xl p-6 sm:p-7 shadow-xl flex flex-col items-center justify-between gap-6 transition-colors duration-300"
     >
       {/* Título de la tarjeta */}
-      <div className="w-full text-center">
+      <div className="w-full text-center flex flex-col items-center gap-1">
         <h3 className="text-xs font-black tracking-widest uppercase text-accent m-0">
           VISTA PREVIA DE TU PORTADA
         </h3>
+        {portada && (
+          <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+            Foto de portada vinculada
+          </span>
+        )}
       </div>
 
       {/* Maqueta 3D del Libro */}
@@ -98,64 +105,80 @@ export default function BookCoverPreview({
         <div
           className={`relative w-[190px] h-[280px] sm:w-[205px] sm:h-[295px] rounded-r-2xl rounded-l-sm bg-gradient-to-br ${currentPalette.gradient} border ${currentPalette.border} shadow-[14px_18px_32px_rgba(0,0,0,0.5),-2px_4px_10px_rgba(0,0,0,0.3)] transition-all duration-500 ease-out flex flex-col justify-between py-6 px-4 select-none overflow-hidden group-hover:scale-[1.02] group-hover:-rotate-1`}
         >
+          {/* Foto de portada si existe */}
+          {portada && (
+            <img
+              src={portada}
+              alt={displayTitle}
+              className="absolute inset-0 w-full h-full object-cover z-0"
+            />
+          )}
+
           {/* Sombra y Relieve del Lomo del Libro (Lado Izquierdo) */}
           <div
-            className="absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-black/55 via-black/20 to-transparent rounded-l-sm pointer-events-none"
+            className="absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-black/55 via-black/20 to-transparent rounded-l-sm pointer-events-none z-10"
             aria-hidden="true"
           />
           {/* Hendidura / Pliegue del lomo */}
           <div
-            className="absolute inset-y-0 left-4 w-[1px] bg-black/45 pointer-events-none"
+            className="absolute inset-y-0 left-4 w-[1px] bg-black/45 pointer-events-none z-10"
             aria-hidden="true"
           />
           <div
-            className="absolute inset-y-0 left-[17px] w-[1px] bg-white/15 pointer-events-none"
+            className="absolute inset-y-0 left-[17px] w-[1px] bg-white/15 pointer-events-none z-10"
             aria-hidden="true"
           />
 
           {/* Brillo en el borde superior y lateral derecho */}
           <div
-            className="absolute inset-x-0 top-0 h-[1.5px] bg-white/25 pointer-events-none"
+            className="absolute inset-x-0 top-0 h-[1.5px] bg-white/25 pointer-events-none z-10"
             aria-hidden="true"
           />
           <div
-            className="absolute inset-y-0 right-0 w-3 bg-gradient-to-l from-white/10 to-transparent rounded-r-2xl pointer-events-none"
+            className="absolute inset-y-0 right-0 w-3 bg-gradient-to-l from-white/10 to-transparent rounded-r-2xl pointer-events-none z-10"
             aria-hidden="true"
           />
 
-          {/* 1. Autor en la parte superior */}
-          <div className="relative z-10 pl-4 pr-1 text-center">
-            <span
-              title={autorLibro || 'Nombre del autor'}
-              className="text-[10px] sm:text-[11px] font-bold tracking-widest text-[#f3eedd]/80 uppercase block truncate drop-shadow-xs"
-            >
-              {displayAuthor}
-            </span>
-          </div>
+          {/* Si NO hay portada fotográfica, se dibuja autor y título */}
+          {!portada ? (
+            <>
+              {/* 1. Autor en la parte superior */}
+              <div className="relative z-10 pl-4 pr-1 text-center">
+                <span
+                  title={autorLibro || 'Nombre del autor'}
+                  className="text-[10px] sm:text-[11px] font-bold tracking-widest text-[#f3eedd]/80 uppercase block truncate drop-shadow-xs"
+                >
+                  {displayAuthor}
+                </span>
+              </div>
 
-          {/* 2. Título en el centro / parte media */}
-          <div className="relative z-10 pl-4 pr-1 text-center my-auto">
-            <h4
-              title={libro || 'Título del libro'}
-              className="font-serif font-black text-xl sm:text-2xl text-[#f7f4ea] leading-tight drop-shadow-md line-clamp-3 m-0"
-            >
-              {displayTitle}
-            </h4>
-          </div>
+              {/* 2. Título en el centro / parte media */}
+              <div className="relative z-10 pl-4 pr-1 text-center my-auto">
+                <h4
+                  title={libro || 'Título del libro'}
+                  className="font-serif font-black text-xl sm:text-2xl text-[#f7f4ea] leading-tight drop-shadow-md line-clamp-3 m-0"
+                >
+                  {displayTitle}
+                </h4>
+              </div>
+            </>
+          ) : (
+            <div className="flex-1" />
+          )}
 
           {/* 3. Etiqueta de género o calificación en la base */}
-          <div className="relative z-10 pl-4 pr-1 flex flex-col items-center gap-1.5">
+          <div className="relative z-10 pl-4 pr-1 flex flex-col items-center gap-1.5 mt-auto">
             {genero ? (
-              <span className="text-[9px] tracking-wider uppercase font-extrabold text-white/90 bg-black/35 px-2.5 py-0.5 rounded-full border border-white/10 backdrop-blur-xs">
+              <span className="text-[9px] tracking-wider uppercase font-extrabold text-white/90 bg-black/55 px-2.5 py-0.5 rounded-full border border-white/15 backdrop-blur-xs shadow-sm">
                 {genero}
               </span>
             ) : (
-              <span className="w-8 h-0.5 bg-white/20 rounded-full" />
+              <span className="w-8 h-0.5 bg-white/30 rounded-full" />
             )}
 
             {calificacion > 0 && (
               <div
-                className="flex items-center gap-0.5 text-accent text-xs drop-shadow"
+                className="flex items-center gap-0.5 text-accent text-xs drop-shadow bg-black/40 px-2 py-0.5 rounded-full"
                 aria-label={`Calificación: ${calificacion} de 5 estrellas`}
               >
                 {[1, 2, 3, 4, 5].map((star) => (
@@ -172,9 +195,24 @@ export default function BookCoverPreview({
         </div>
       </div>
 
+      {/* Botón para quitar portada si fue asignada */}
+      {portada && onRemoveCover && (
+        <button
+          type="button"
+          onClick={onRemoveCover}
+          className="text-xs text-rose-500 hover:text-rose-600 dark:text-rose-400 font-bold hover:underline flex items-center gap-1.5 cursor-pointer -mt-2 transition-colors"
+          title="Quitar foto de portada y usar portada con autor y título"
+        >
+          <span className="w-4 h-4 rounded-full bg-rose-500/10 flex items-center justify-center text-[10px]">✕</span>
+          <span>Quitar foto de portada</span>
+        </button>
+      )}
+
       {/* Pie descriptivo de la portada */}
       <p className="text-xs sm:text-[13px] text-paper-muted dark:text-dark-muted leading-relaxed text-center max-w-[260px] m-0">
-        La portada se genera automáticamente combinando la tipografía clásica con la paleta de tu género.
+        {portada
+          ? 'Portada oficial vinculada desde el catálogo. Si prefieres la portada clásica con tipografía, puedes quitar la foto.'
+          : 'La portada se genera automáticamente combinando la tipografía clásica con la paleta de tu género.'}
       </p>
     </aside>
   )
