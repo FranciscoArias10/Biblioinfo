@@ -55,7 +55,7 @@ export function validateReview(data) {
   // Validación: Fecha (formato AAAA-MM-DD, el mismo que envía <input type="date">)
   if (!fecha || typeof fecha !== 'string') {
     errors.push('La fecha de la reseña es obligatoria.');
-  } else if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha.trim()) || isNaN(new Date(fecha.trim()).getTime())) {
+  } else if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha.trim()) || isNaN(new Date(fecha.trim()).getTime()) || new Date(fecha.trim()).toISOString().slice(0, 10) !== fecha.trim()) {
     errors.push('La fecha proporcionada tiene un formato no válido (use AAAA-MM-DD).');
   } else if (fecha.trim() > getLocalToday()) {
     // Se compara como texto AAAA-MM-DD contra la fecha local de hoy.
