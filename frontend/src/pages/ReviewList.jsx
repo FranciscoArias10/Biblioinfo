@@ -56,9 +56,24 @@ function groupReviewsByBook(reviewsList) {
   })
 }
 
+const CANONICAL_GENRES = [
+  'Todos',
+  'Ficción',
+  'Ciencia Ficción',
+  'Fantasía',
+  'Historia',
+  'Romance',
+  'Misterio',
+  'Poesía',
+  'Ensayo',
+  'Desarrollo Personal',
+  'Clásico',
+]
+
 export default function ReviewList() {
   const [searchParams, setSearchParams] = useSearchParams()
   const searchQuery = searchParams.get('q') || ''
+  const selectedGenre = searchParams.get('genero') || ''
 
   const [reviews, setReviews] = useState([])
   const [isLoading, setIsLoading] = useState(true)
@@ -84,7 +99,19 @@ export default function ReviewList() {
     }
   }, [])
 
-  // Group reviews into unique books, sort them by average rating (promedio), and filter by search
+  // Dynamic available genres list combining canonical and database genres
+  const availableGenres = useMemo(() => {
+    const list = [...CANONICAL_GENRES]
+    reviews.forEach((r) => {
+      const g = (r.genero || r.genre || '').trim()
+      if (g && !list.some((item) => item.toLowerCase() === g.toLowerCase())) {
+        list.push(g)
+      }
+    })
+    return list
+  }, [reviews])
+
+  // Group reviews into unique books, sort them by average rating (promedio), and filter by search & genre
   const books = useMemo(() => {
     const grouped = groupReviewsByBook(reviews)
 
@@ -96,16 +123,43 @@ export default function ReviewList() {
       return b.reviewCount - a.reviewCount
     })
 
+    let filtered = grouped
+
+    // Filter by genre pill (exact normalized match)
+    if (selectedGenre && selectedGenre.toLowerCase() !== 'todos') {
+      const normalize = (str) =>
+        str
+          .toLowerCase()
+          .trim()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+
+      const gQueryNorm = normalize(selectedGenre)
+
+      filtered = filtered.filter((book) => {
+        const bookGNorm = normalize(book.genre || '')
+        const hasMatchingReview =
+          book.reviews &&
+          book.reviews.some((r) => {
+            const revGenreNorm = normalize(r.genero || r.genre || '')
+            return revGenreNorm === gQueryNorm
+          })
+        return bookGNorm === gQueryNorm || hasMatchingReview
+      })
+    }
+
     // Filter by search query (nombre del libro o autor)
     const query = searchQuery.toLowerCase().trim()
-    if (!query) return grouped
+    if (query) {
+      filtered = filtered.filter(
+        (book) =>
+          book.title.toLowerCase().includes(query) ||
+          book.author.toLowerCase().includes(query)
+      )
+    }
 
-    return grouped.filter(
-      (book) =>
-        book.title.toLowerCase().includes(query) ||
-        book.author.toLowerCase().includes(query)
-    )
-  }, [reviews, searchQuery])
+    return filtered
+  }, [reviews, searchQuery, selectedGenre])
 
   const handleSearchChange = (val) => {
     setSearchParams((prev) => {
@@ -115,6 +169,27 @@ export default function ReviewList() {
       } else {
         next.set('q', val.trim())
       }
+      return next
+    })
+  }
+
+  const handleGenreSelect = (genre) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      if (genre === 'Todos' || genre.toLowerCase() === 'todos') {
+        next.delete('genero')
+      } else {
+        next.set('genero', genre)
+      }
+      return next
+    })
+  }
+
+  const handleResetAllFilters = () => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      next.delete('q')
+      next.delete('genero')
       return next
     })
   }
@@ -135,7 +210,7 @@ export default function ReviewList() {
           </span>
         </div>
 
-        {/* Simple & Clean Search Bar (Only by Name or Author, no genres) */}
+        {/* Simple & Clean Search Bar */}
         <div className="relative w-full max-w-2xl mx-auto">
           <svg
             aria-hidden="true"
@@ -171,18 +246,46 @@ export default function ReviewList() {
           )}
         </div>
 
+        {/* Pastillas de Filtro por Género (Genre Pills) */}
+        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-2.5 max-w-4xl mx-auto -mt-2">
+          {availableGenres.map((g) => {
+            const isSelected =
+              (!selectedGenre && g === 'Todos') ||
+              (selectedGenre && selectedGenre.toLowerCase() === g.toLowerCase())
+
+            return (
+              <button
+                key={g}
+                type="button"
+                onClick={() => handleGenreSelect(g)}
+                className={`px-4 py-2 rounded-full text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
+                  isSelected
+                    ? 'bg-accent text-[#141312] font-black shadow-md scale-105 ring-2 ring-accent/30'
+                    : 'bg-paper-surface dark:bg-dark-surface border border-paper-borderStrong dark:border-dark-borderStrong text-paper-text dark:text-dark-text hover:border-accent hover:text-accent hover:scale-102'
+                }`}
+              >
+                {g}
+              </button>
+            )
+          })}
+        </div>
+
         {/* Results Counter */}
-        <div className="flex items-center justify-between text-xs sm:text-sm text-paper-muted dark:text-dark-muted px-1">
+        <div className="flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm text-paper-muted dark:text-dark-muted px-1">
           <span>
-            {books.length} {books.length === 1 ? 'libro' : 'libros'} en la estantería (ordenados por mayor promedio)
+            {books.length} {books.length === 1 ? 'libro' : 'libros'} en la estantería{' '}
+            {selectedGenre && selectedGenre.toLowerCase() !== 'todos' && (
+              <span className="font-bold text-accent">de {selectedGenre}{' '}</span>
+            )}
+            (ordenados por mayor promedio)
           </span>
-          {searchQuery && (
+          {(searchQuery || (selectedGenre && selectedGenre.toLowerCase() !== 'todos')) && (
             <button
               type="button"
-              onClick={() => handleSearchChange('')}
+              onClick={handleResetAllFilters}
               className="text-accent hover:underline font-bold"
             >
-              Mostrar todos los libros
+              Mostrar todos los libros y géneros
             </button>
           )}
         </div>
@@ -213,14 +316,18 @@ export default function ReviewList() {
               No se encontró ningún libro
             </h3>
             <p className="text-sm text-paper-muted dark:text-dark-muted max-w-md">
-              No hay obras que coincidan con la búsqueda &ldquo;{searchQuery}&rdquo;. Intenta con otro nombre o autor.
+              No hay obras que coincidan
+              {searchQuery ? ` con "${searchQuery}"` : ''}
+              {searchQuery && selectedGenre && selectedGenre.toLowerCase() !== 'todos' ? ' en el género ' : ''}
+              {!searchQuery && selectedGenre && selectedGenre.toLowerCase() !== 'todos' ? ' con el género ' : ''}
+              {selectedGenre && selectedGenre.toLowerCase() !== 'todos' ? `"${selectedGenre}"` : ''}.
             </p>
             <button
               type="button"
-              onClick={() => handleSearchChange('')}
+              onClick={handleResetAllFilters}
               className="mt-2 text-accent font-bold text-sm hover:underline"
             >
-              Restablecer búsqueda
+              Restablecer todos los filtros
             </button>
           </div>
         ) : (
