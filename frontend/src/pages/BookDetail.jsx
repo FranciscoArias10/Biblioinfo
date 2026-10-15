@@ -5,6 +5,7 @@ import Footer from '../components/Footer'
 import BookCover from '../components/BookCover'
 import Spinner from '../components/Spinner'
 import { getReviews, INITIAL_REVIEWS } from '../services/api'
+import { getBookPalette } from '../utils/palette'
 
 export default function BookDetail() {
   const { id } = useParams()
@@ -80,12 +81,13 @@ export default function BookDetail() {
     )
     const average = totalScore / matchedReviews.length
 
+    const palette = getBookPalette(title, genre)
     return {
       title,
       author,
       genre,
-      bg: first.bg,
-      fg: first.fg,
+      bg: first.bg || palette.bg,
+      fg: first.fg || palette.fg,
       averageRating: Number(average.toFixed(1)),
       reviews: matchedReviews,
     }

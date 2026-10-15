@@ -5,6 +5,7 @@ import Footer from '../components/Footer'
 import BookCover from '../components/BookCover'
 import Spinner from '../components/Spinner'
 import { getReviews } from '../services/api'
+import { getBookPalette } from '../utils/palette'
 
 /**
  * Group raw review items by book title to calculate averages and collect all reviews per book
@@ -17,13 +18,14 @@ function groupReviewsByBook(reviewsList) {
     const key = rawTitle.toLowerCase()
 
     if (!map.has(key)) {
+      const palette = getBookPalette(rawTitle, r.genero || r.genre)
       map.set(key, {
         id: r.id,
         title: rawTitle,
         author: (r.autorLibro || r.author || r.bookAuthor || 'Autor desconocido').trim(),
         genre: r.genero || r.genre || 'Ficción',
-        bg: r.bg,
-        fg: r.fg,
+        bg: r.bg || palette.bg,
+        fg: r.fg || palette.fg,
         reviews: [],
       })
     }

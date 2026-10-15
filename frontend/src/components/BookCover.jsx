@@ -170,7 +170,7 @@ export default function BookCover({
 
       {/* Optional Count / Review Label under the book */}
       {count && (
-        <span className="text-[13px] font-bold text-center text-paper-text dark:text-dark-text truncate">
+        <span className="text-[13px] font-bold text-center truncate text-inherit">
           {count}
         </span>
       )}
