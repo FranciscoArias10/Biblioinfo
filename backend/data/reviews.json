@@ -1,5 +1,17 @@
 [
   {
+    "id": "da7e1d70-ffd3-4b82-b07b-5c6746029b00",
+    "libro": "El Principito",
+    "autorLibro": "Antoine de Saint-Exupéry",
+    "nombre": "Carlos Gómez",
+    "email": "carlos.gomez@correo.com",
+    "genero": "Ficción",
+    "fecha": "2026-10-14",
+    "calificacion": 5,
+    "descripcion": "Una lectura entrañable que enseña el valor de la amistad y la empatía.",
+    "createdAt": "2026-10-15T02:44:28.111Z"
+  },
+  {
     "id": "9d51fd3d-d42f-4729-818a-57648e8c7f95",
     "libro": "El Nombre de la Rosa",
     "autorLibro": "Umberto Eco",
@@ -8,7 +20,7 @@
     "genero": "Misterio",
     "fecha": "2026-10-12",
     "calificacion": 5,
-    "descripcion": "Una apasionante novela de misterio eclesistico en una abada benedictina del siglo XIV.",
+    "descripcion": "Una apasionante novela de misterio eclesiástico en una abadía benedictina del siglo XIV.",
     "createdAt": "2026-10-13T00:46:41.486Z"
   },
   {

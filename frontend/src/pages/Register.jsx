@@ -12,31 +12,28 @@ export default function Register() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [createdReview, setCreatedReview] = useState(null)
 
-  const handleFormSubmit = async (formData) => {
+  const handleSubmit = async (formData) => {
     setIsSubmitting(true)
     setFeedback(null)
+    setCreatedReview(null)
 
     try {
       const response = await createReview(formData)
-      const reviewData = response.review || response
-
-      setCreatedReview(reviewData)
+      setCreatedReview(response.data || response.review || formData)
       setFeedback({
         type: 'success',
-        message: `¡Tu reseña de "${formData.libro}" fue registrada exitosamente!`,
+        message: '¡Reseña registrada exitosamente!',
         details: [
-          'La reseña se ha guardado de forma persistente en el servidor.',
-          'Ya puedes consultarla y filtrarla en el catálogo general.',
+          `Obra: "${formData.libro}" por ${formData.autorLibro}`,
+          'Los datos fueron guardados y persistidos en el servidor.',
         ],
       })
-
-      // Scroll hacia arriba para que el usuario vea la alerta de confirmación
       window.scrollTo({ top: 0, behavior: 'smooth' })
-    } catch (err) {
+    } catch (error) {
       setFeedback({
         type: 'error',
-        message: err.message || 'Ocurrió un error inesperado al publicar tu reseña.',
-        details: err.details || [],
+        message: error.message || 'Ocurrió un error al registrar la reseña',
+        details: error.details || error.errors || ['Verifica que el servidor backend esté activo en http://localhost:5000'],
       })
       window.scrollTo({ top: 0, behavior: 'smooth' })
     } finally {
@@ -44,75 +41,65 @@ export default function Register() {
     }
   }
 
-  const handleDismissAlert = () => {
-    setFeedback(null)
-  }
-
   return (
     <div className="bg-paper-bg dark:bg-dark-bg text-paper-text dark:text-dark-text min-h-screen flex flex-col transition-colors duration-300">
       <Navbar />
 
-      <main className="flex-1 max-w-[1240px] w-full mx-auto px-4 sm:px-6 py-10 sm:py-14 flex flex-col gap-8">
-        {/* Encabezado de la Página */}
-        <div className="flex flex-col gap-3 text-center sm:text-left">
-          <div className="flex items-center gap-2 self-center sm:self-start">
-            <span className="w-10 h-1 rounded-full bg-accent" />
-            <span className="text-xs sm:text-sm font-bold tracking-widest uppercase text-accent">
+      <main className="flex-1 max-w-[860px] w-full mx-auto px-4 sm:px-6 py-12 sm:py-16">
+        {/* Header Section */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center gap-2 mb-3">
+            <span className="w-8 h-1 rounded-full bg-accent" />
+            <span className="text-xs font-bold uppercase tracking-wider text-accent">
               Nueva Publicación
             </span>
+            <span className="w-8 h-1 rounded-full bg-accent" />
           </div>
-
-          <h1 className="font-serif font-black text-3xl sm:text-4xl lg:text-5xl tracking-tight text-paper-text dark:text-dark-text m-0">
-            Escribir una Reseña Literaria
+          <h1 className="font-serif font-black text-3xl sm:text-4xl text-paper-text dark:text-dark-text mb-3">
+            Compartir una Reseña Literaria
           </h1>
-
-          <p className="text-base sm:text-lg leading-relaxed text-paper-muted dark:text-dark-muted max-w-2xl m-0">
-            Comparte tu perspectiva crítica y honesta sobre cualquier libro que hayas leído. Tu opinión ayudará a otros lectores de la comunidad a encontrar su próxima aventura.
+          <p className="text-paper-muted dark:text-dark-muted max-w-lg mx-auto text-sm sm:text-base">
+            Contribuye al catálogo de BookVerse. Tus reseñas se almacenan de forma persistente en el servidor de la comunidad.
           </p>
         </div>
 
-        {/* Notificación de Éxito / Error */}
+        {/* Feedback Alert */}
         {feedback && (
-          <div className="flex flex-col gap-4">
+          <div className="mb-6">
             <AlertMessage
               type={feedback.type}
               message={feedback.message}
               details={feedback.details}
-              onClose={handleDismissAlert}
+              onClose={() => setFeedback(null)}
             />
-
             {feedback.type === 'success' && (
-              <div className="bg-emerald-500/10 dark:bg-emerald-950/20 border border-emerald-500/30 rounded-2xl p-5 flex flex-wrap items-center justify-between gap-4">
-                <span className="text-sm font-semibold text-emerald-800 dark:text-emerald-300">
-                  ¿Deseas verificar tu reseña publicada en el catálogo?
-                </span>
-                <div className="flex items-center gap-3">
-                  <Link
-                    to="/lista"
-                    className="bg-accent hover:bg-accent-hover text-[#141312] font-extrabold text-sm rounded-full px-5 py-2.5 transition-all shadow-md"
-                  >
-                    Ver en Catálogo
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setFeedback(null)
-                      setCreatedReview(null)
-                    }}
-                    className="text-sm font-bold text-paper-muted dark:text-dark-muted hover:text-paper-text dark:hover:text-dark-text px-3 py-2"
-                  >
-                    Publicar otra reseña
-                  </button>
-                </div>
+              <div className="mt-4 flex flex-wrap gap-3 justify-center">
+                <Link
+                  to="/lista"
+                  className="bg-accent hover:bg-accent-hover text-[#141312] font-bold px-6 py-2.5 rounded-full text-sm transition-all shadow-md hover:scale-105 inline-flex items-center gap-2"
+                >
+                  <span>Ver Catálogo de Reseñas</span>
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFeedback(null)
+                    setCreatedReview(null)
+                  }}
+                  className="border border-paper-border dark:border-dark-border hover:bg-paper-surface dark:hover:bg-dark-surface px-5 py-2.5 rounded-full text-sm font-semibold transition-colors"
+                >
+                  Escribir otra reseña
+                </button>
               </div>
             )}
           </div>
         )}
 
-        {/* Formulario Controlado */}
-        {(!feedback || feedback.type !== 'success') && (
-          <ReviewForm onSubmit={handleFormSubmit} isSubmitting={isSubmitting} />
-        )}
+        {/* Formulario */}
+        <ReviewForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
       </main>
 
       <Footer />

@@ -1,11 +1,21 @@
 import { useState } from 'react'
-import FormField from './form/FormField'
-import StarRating from './form/StarRating'
-import BookCoverPreview from './BookCoverPreview'
-import { GENRES_OPTIONS, validateField, validateReviewForm } from '../utils/reviewValidator'
+
+const GENRES = [
+  'Ficción',
+  'Ciencia Ficción',
+  'Fantasía',
+  'Historia',
+  'Romance',
+  'Misterio',
+  'Poesía',
+  'Ensayo',
+  'Desarrollo Personal',
+  'No Ficción',
+]
 
 export default function ReviewForm({ onSubmit, isSubmitting = false }) {
-  const today = new Date().toISOString().split('T')[0]
+  // Fecha de hoy por defecto en formato YYYY-MM-DD
+  const todayStr = new Date().toISOString().split('T')[0]
 
   const [formData, setFormData] = useState({
     libro: '',
@@ -13,276 +23,385 @@ export default function ReviewForm({ onSubmit, isSubmitting = false }) {
     nombre: '',
     email: '',
     genero: '',
-    fecha: today,
-    calificacion: 0,
+    fecha: todayStr,
+    calificacion: 5,
     descripcion: '',
   })
 
   const [errors, setErrors] = useState({})
   const [touched, setTouched] = useState({})
 
+  const validateField = (name, value) => {
+    let error = ''
+    switch (name) {
+      case 'libro':
+        if (!value || value.trim().length < 2) {
+          error = 'El título del libro es obligatorio (mínimo 2 letras).'
+        }
+        break
+      case 'autorLibro':
+        if (!value || value.trim().length < 2) {
+          error = 'El autor del libro es obligatorio (mínimo 2 letras).'
+        }
+        break
+      case 'nombre':
+        if (!value || value.trim().length < 2) {
+          error = 'Tu nombre como autor de la reseña es obligatorio.'
+        }
+        break
+      case 'email': {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        if (!value || !emailRegex.test(value.trim())) {
+          error = 'Ingresa un correo electrónico válido (ejemplo: usuario@correo.com).'
+        }
+        break
+      }
+      case 'genero':
+        if (!value || value.trim() === '') {
+          error = 'Debes seleccionar un género literario.'
+        }
+        break
+      case 'fecha': {
+        if (!value) {
+          error = 'La fecha de la reseña es obligatoria.'
+        } else {
+          const selected = new Date(value)
+          const today = new Date()
+          today.setHours(23, 59, 59, 999)
+          if (selected > today) {
+            error = 'La fecha de la reseña no puede ser futura.'
+          }
+        }
+        break
+      }
+      case 'calificacion': {
+        const num = Number(value)
+        if (isNaN(num) || num < 1 || num > 5) {
+          error = 'La calificación debe ser entre 1 y 5 estrellas.'
+        }
+        break
+      }
+      case 'descripcion':
+        if (!value || value.trim().length < 10) {
+          error = 'La reseña debe contener una descripción de al menos 10 caracteres.'
+        }
+        break
+      default:
+        break
+    }
+    return error
+  }
+
   const handleChange = (e) => {
     const { name, value } = e.target
-    const updatedValue = name === 'calificacion' ? Number(value) : value
-
-    setFormData((prev) => ({ ...prev, [name]: updatedValue }))
+    setFormData((prev) => ({ ...prev, [name]: value }))
 
     if (touched[name]) {
-      const errorMsg = validateField(name, updatedValue, today)
-      setErrors((prev) => ({ ...prev, [name]: errorMsg }))
+      const error = validateField(name, value)
+      setErrors((prev) => ({ ...prev, [name]: error }))
     }
   }
 
   const handleBlur = (e) => {
     const { name, value } = e.target
     setTouched((prev) => ({ ...prev, [name]: true }))
-    const errorMsg = validateField(name, value, today)
-    setErrors((prev) => ({ ...prev, [name]: errorMsg }))
-  }
-
-  const handleRatingChange = (starValue) => {
-    setFormData((prev) => ({ ...prev, calificacion: starValue }))
-    setTouched((prev) => ({ ...prev, calificacion: true }))
-    setErrors((prev) => ({ ...prev, calificacion: '' }))
+    const error = validateField(name, value)
+    setErrors((prev) => ({ ...prev, [name]: error }))
   }
 
   const handleSubmit = (e) => {
     e.preventDefault()
 
-    const allTouched = Object.keys(formData).reduce((acc, key) => ({ ...acc, [key]: true }), {})
-    setTouched(allTouched)
+    // Validar todos los campos
+    const newErrors = {}
+    const newTouched = {}
+    Object.keys(formData).forEach((key) => {
+      newTouched[key] = true
+      const error = validateField(key, formData[key])
+      if (error) newErrors[key] = error
+    })
 
-    const formValidationErrors = validateReviewForm(formData, today)
-    setErrors(formValidationErrors)
+    setTouched(newTouched)
+    setErrors(newErrors)
 
-    if (Object.keys(formValidationErrors).length === 0) {
+    if (Object.keys(newErrors).length > 0) {
+      return
+    }
+
+    if (onSubmit) {
       onSubmit(formData)
     }
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-      {/* Formulario Controlado Principal */}
-      <form
-        onSubmit={handleSubmit}
-        noValidate
-        className="lg:col-span-8 bg-paper-surface dark:bg-dark-card border border-paper-border dark:border-dark-border rounded-3xl p-6 sm:p-10 shadow-xl transition-colors duration-300 flex flex-col gap-8"
-      >
-        {/* Sección 1: Información del Libro */}
-        <div className="flex flex-col gap-5">
-          <div className="flex items-center gap-3 border-b border-paper-border dark:border-dark-border pb-3">
-            <span className="w-8 h-8 rounded-full bg-accent/15 text-accent font-bold flex items-center justify-center text-sm">
-              1
-            </span>
-            <h2 className="font-serif font-bold text-xl text-paper-text dark:text-dark-text m-0">
-              Información del Libro
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <FormField
-              label="Título del Libro"
-              name="libro"
-              value={formData.libro}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={errors.libro}
-              touched={touched.libro}
-              placeholder="Nombre completo de la obra"
-              disabled={isSubmitting}
-              hint="ej. Cien años de soledad"
-            />
-
-            <FormField
-              label="Autor de la Obra"
-              name="autorLibro"
-              value={formData.autorLibro}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={errors.autorLibro}
-              touched={touched.autorLibro}
-              placeholder="Escritor o escritora"
-              disabled={isSubmitting}
-              hint="ej. Gabriel García Márquez"
-            />
-
-            {/* Selector de Género */}
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="genero" className="text-sm font-bold text-paper-text dark:text-dark-text">
-                Género Literario <span className="text-accent">*</span>
-              </label>
-              <select
-                id="genero"
-                name="genero"
-                value={formData.genero}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                disabled={isSubmitting}
-                className={`w-full px-4 py-3 rounded-xl bg-paper-bg dark:bg-dark-bg border text-paper-text dark:text-dark-text focus:outline-none focus:ring-2 transition-all ${
-                  errors.genero && touched.genero
-                    ? 'border-rose-500 focus:ring-rose-500/20'
-                    : 'border-paper-borderStrong dark:border-dark-border focus:border-accent focus:ring-accent/20'
-                }`}
-              >
-                <option value="" disabled>Selecciona un género...</option>
-                {GENRES_OPTIONS.map((g) => (
-                  <option key={g} value={g} className="bg-paper-surface dark:bg-dark-card text-paper-text dark:text-dark-text">
-                    {g}
-                  </option>
-                ))}
-              </select>
-              {errors.genero && touched.genero && (
-                <span className="text-xs text-rose-500 font-medium mt-0.5">{errors.genero}</span>
-              )}
-            </div>
-
-            {/* Selector de Estrellas */}
-            <StarRating
-              value={formData.calificacion}
-              onChange={handleRatingChange}
-              error={errors.calificacion}
-              touched={touched.calificacion}
-              disabled={isSubmitting}
-            />
-          </div>
-        </div>
-
-        {/* Sección 2: Datos del Lector y Fecha */}
-        <div className="flex flex-col gap-5">
-          <div className="flex items-center gap-3 border-b border-paper-border dark:border-dark-border pb-3">
-            <span className="w-8 h-8 rounded-full bg-accent/15 text-accent font-bold flex items-center justify-center text-sm">
-              2
-            </span>
-            <h2 className="font-serif font-bold text-xl text-paper-text dark:text-dark-text m-0">
-              Datos del Lector y Fecha
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-start">
-            <FormField
-              label="Tu Nombre / Apodo"
-              name="nombre"
-              value={formData.nombre}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={errors.nombre}
-              touched={touched.nombre}
-              placeholder="ej. Darly Farias"
-              disabled={isSubmitting}
-            />
-
-            <FormField
-              label="Correo Electrónico"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={errors.email}
-              touched={touched.email}
-              placeholder="ejemplo@correo.com"
-              disabled={isSubmitting}
-            />
-
-            <FormField
-              label="Fecha de Lectura"
-              name="fecha"
-              type="date"
-              max={today}
-              value={formData.fecha}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={errors.fecha}
-              touched={touched.fecha}
-              disabled={isSubmitting}
-            />
-          </div>
-        </div>
-
-        {/* Sección 3: Crítica Literaria */}
-        <div className="flex flex-col gap-5">
-          <div className="flex items-center gap-3 border-b border-paper-border dark:border-dark-border pb-3">
-            <span className="w-8 h-8 rounded-full bg-accent/15 text-accent font-bold flex items-center justify-center text-sm">
-              3
-            </span>
-            <h2 className="font-serif font-bold text-xl text-paper-text dark:text-dark-text m-0">
-              Crítica Literaria
-            </h2>
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <div className="flex items-center justify-between">
-              <label htmlFor="descripcion" className="text-sm font-bold text-paper-text dark:text-dark-text">
-                Tu Opinión sobre el Libro <span className="text-accent">*</span>
-              </label>
-              <span
-                className={`text-xs ${
-                  formData.descripcion.trim().length >= 10
-                    ? 'text-emerald-600 dark:text-emerald-400 font-medium'
-                    : 'text-paper-muted dark:text-dark-muted'
-                }`}
-              >
-                {formData.descripcion.trim().length} / 10 caracteres mín.
-              </span>
-            </div>
-
-            <textarea
-              id="descripcion"
-              name="descripcion"
-              rows="5"
-              value={formData.descripcion}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              placeholder="Comparte tus impresiones, el impacto de los personajes, el estilo del autor o por qué recomiendas esta lectura..."
-              disabled={isSubmitting}
-              className={`w-full px-4 py-3 rounded-2xl bg-paper-bg dark:bg-dark-bg border text-paper-text dark:text-dark-text placeholder:text-paper-muted/60 dark:placeholder:text-dark-muted/50 focus:outline-none focus:ring-2 transition-all resize-y ${
-                errors.descripcion && touched.descripcion
-                  ? 'border-rose-500 focus:ring-rose-500/20'
-                  : 'border-paper-borderStrong dark:border-dark-border focus:border-accent focus:ring-accent/20'
-              }`}
-            />
-            {errors.descripcion && touched.descripcion && (
-              <span className="text-xs text-rose-500 font-medium mt-0.5">{errors.descripcion}</span>
-            )}
-          </div>
-        </div>
-
-        {/* Botón de Envío */}
-        <div className="pt-2 flex flex-col sm:flex-row items-center justify-end gap-4 border-t border-paper-border dark:border-dark-border">
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full sm:w-auto bg-accent hover:bg-accent-hover disabled:bg-accent/50 text-[#141312] font-black text-base rounded-full px-9 py-4 flex items-center justify-center gap-3 transition-all shadow-lg shadow-accent/25 hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:transform-none"
+    <form
+      onSubmit={handleSubmit}
+      noValidate
+      className="bg-paper-card dark:bg-dark-card border border-paper-border dark:border-dark-border rounded-2xl p-6 sm:p-8 shadow-card-light dark:shadow-none space-y-6"
+    >
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        {/* Título del Libro */}
+        <div className="sm:col-span-1">
+          <label
+            htmlFor="libro"
+            className="block text-xs font-bold uppercase tracking-wider text-paper-muted dark:text-dark-muted mb-1.5"
           >
-            {isSubmitting ? (
-              <>
-                <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-[#141312]" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                </svg>
-                <span>Publicando reseña...</span>
-              </>
-            ) : (
-              <>
-                <span>Publicar Reseña Ahora</span>
-                <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M5 12h14M13 6l6 6-6 6" />
-                </svg>
-              </>
-            )}
-          </button>
+            Título del Libro *
+          </label>
+          <input
+            id="libro"
+            name="libro"
+            type="text"
+            placeholder="Ej: Cien años de soledad"
+            value={formData.libro}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            disabled={isSubmitting}
+            className={`w-full px-4 py-2.5 rounded-xl border text-sm transition-colors bg-paper-surface dark:bg-dark-surface text-paper-text dark:text-dark-text focus:outline-none focus:ring-2 ${
+              errors.libro
+                ? 'border-rose-500 focus:ring-rose-400'
+                : 'border-paper-border dark:border-dark-border focus:ring-accent/50 focus:border-accent'
+            }`}
+          />
+          {errors.libro && (
+            <p className="mt-1 text-xs text-rose-500 font-medium">{errors.libro}</p>
+          )}
         </div>
-      </form>
 
-      {/* Columna Lateral con Vista Previa 3D en Vivo */}
-      <div className="lg:col-span-4 lg:sticky lg:top-24 w-full flex justify-center">
-        <BookCoverPreview
-          libro={formData.libro}
-          autorLibro={formData.autorLibro}
-          genero={formData.genero}
-          calificacion={formData.calificacion}
-        />
+        {/* Autor del Libro */}
+        <div className="sm:col-span-1">
+          <label
+            htmlFor="autorLibro"
+            className="block text-xs font-bold uppercase tracking-wider text-paper-muted dark:text-dark-muted mb-1.5"
+          >
+            Autor del Libro *
+          </label>
+          <input
+            id="autorLibro"
+            name="autorLibro"
+            type="text"
+            placeholder="Ej: Gabriel García Márquez"
+            value={formData.autorLibro}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            disabled={isSubmitting}
+            className={`w-full px-4 py-2.5 rounded-xl border text-sm transition-colors bg-paper-surface dark:bg-dark-surface text-paper-text dark:text-dark-text focus:outline-none focus:ring-2 ${
+              errors.autorLibro
+                ? 'border-rose-500 focus:ring-rose-400'
+                : 'border-paper-border dark:border-dark-border focus:ring-accent/50 focus:border-accent'
+            }`}
+          />
+          {errors.autorLibro && (
+            <p className="mt-1 text-xs text-rose-500 font-medium">{errors.autorLibro}</p>
+          )}
+        </div>
+
+        {/* Nombre del Reseñador */}
+        <div className="sm:col-span-1">
+          <label
+            htmlFor="nombre"
+            className="block text-xs font-bold uppercase tracking-wider text-paper-muted dark:text-dark-muted mb-1.5"
+          >
+            Tu Nombre *
+          </label>
+          <input
+            id="nombre"
+            name="nombre"
+            type="text"
+            placeholder="Ej: Carlos Gómez"
+            value={formData.nombre}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            disabled={isSubmitting}
+            className={`w-full px-4 py-2.5 rounded-xl border text-sm transition-colors bg-paper-surface dark:bg-dark-surface text-paper-text dark:text-dark-text focus:outline-none focus:ring-2 ${
+              errors.nombre
+                ? 'border-rose-500 focus:ring-rose-400'
+                : 'border-paper-border dark:border-dark-border focus:ring-accent/50 focus:border-accent'
+            }`}
+          />
+          {errors.nombre && (
+            <p className="mt-1 text-xs text-rose-500 font-medium">{errors.nombre}</p>
+          )}
+        </div>
+
+        {/* Correo Electrónico */}
+        <div className="sm:col-span-1">
+          <label
+            htmlFor="email"
+            className="block text-xs font-bold uppercase tracking-wider text-paper-muted dark:text-dark-muted mb-1.5"
+          >
+            Correo Electrónico *
+          </label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="carlos.gomez@correo.com"
+            value={formData.email}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            disabled={isSubmitting}
+            className={`w-full px-4 py-2.5 rounded-xl border text-sm transition-colors bg-paper-surface dark:bg-dark-surface text-paper-text dark:text-dark-text focus:outline-none focus:ring-2 ${
+              errors.email
+                ? 'border-rose-500 focus:ring-rose-400'
+                : 'border-paper-border dark:border-dark-border focus:ring-accent/50 focus:border-accent'
+            }`}
+          />
+          {errors.email && (
+            <p className="mt-1 text-xs text-rose-500 font-medium">{errors.email}</p>
+          )}
+        </div>
+
+        {/* Género Literario */}
+        <div className="sm:col-span-1">
+          <label
+            htmlFor="genero"
+            className="block text-xs font-bold uppercase tracking-wider text-paper-muted dark:text-dark-muted mb-1.5"
+          >
+            Género Literario *
+          </label>
+          <select
+            id="genero"
+            name="genero"
+            value={formData.genero}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            disabled={isSubmitting}
+            className={`w-full px-4 py-2.5 rounded-xl border text-sm transition-colors bg-paper-surface dark:bg-dark-surface text-paper-text dark:text-dark-text focus:outline-none focus:ring-2 ${
+              errors.genero
+                ? 'border-rose-500 focus:ring-rose-400'
+                : 'border-paper-border dark:border-dark-border focus:ring-accent/50 focus:border-accent'
+            }`}
+          >
+            <option value="">Selecciona un género...</option>
+            {GENRES.map((g) => (
+              <option key={g} value={g}>
+                {g}
+              </option>
+            ))}
+          </select>
+          {errors.genero && (
+            <p className="mt-1 text-xs text-rose-500 font-medium">{errors.genero}</p>
+          )}
+        </div>
+
+        {/* Fecha de la Reseña */}
+        <div className="sm:col-span-1">
+          <label
+            htmlFor="fecha"
+            className="block text-xs font-bold uppercase tracking-wider text-paper-muted dark:text-dark-muted mb-1.5"
+          >
+            Fecha de la Reseña *
+          </label>
+          <input
+            id="fecha"
+            name="fecha"
+            type="date"
+            max={todayStr}
+            value={formData.fecha}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            disabled={isSubmitting}
+            className={`w-full px-4 py-2.5 rounded-xl border text-sm transition-colors bg-paper-surface dark:bg-dark-surface text-paper-text dark:text-dark-text focus:outline-none focus:ring-2 ${
+              errors.fecha
+                ? 'border-rose-500 focus:ring-rose-400'
+                : 'border-paper-border dark:border-dark-border focus:ring-accent/50 focus:border-accent'
+            }`}
+          />
+          {errors.fecha && (
+            <p className="mt-1 text-xs text-rose-500 font-medium">{errors.fecha}</p>
+          )}
+        </div>
+
+        {/* Calificación (1 a 5 estrellas) */}
+        <div className="sm:col-span-2">
+          <label className="block text-xs font-bold uppercase tracking-wider text-paper-muted dark:text-dark-muted mb-2">
+            Calificación: {formData.calificacion} de 5 Estrellas *
+          </label>
+          <div className="flex items-center gap-2">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                type="button"
+                onClick={() => {
+                  setFormData((prev) => ({ ...prev, calificacion: star }))
+                  setErrors((prev) => ({ ...prev, calificacion: '' }))
+                }}
+                disabled={isSubmitting}
+                className="text-2xl sm:text-3xl transition-transform hover:scale-110 focus:outline-none"
+                aria-label={`${star} estrella${star > 1 ? 's' : ''}`}
+              >
+                <span className={star <= Number(formData.calificacion) ? 'text-accent' : 'text-stone-300 dark:text-stone-600'}>
+                  ★
+                </span>
+              </button>
+            ))}
+          </div>
+          {errors.calificacion && (
+            <p className="mt-1 text-xs text-rose-500 font-medium">{errors.calificacion}</p>
+          )}
+        </div>
+
+        {/* Descripción / Contenido */}
+        <div className="sm:col-span-2">
+          <label
+            htmlFor="descripcion"
+            className="block text-xs font-bold uppercase tracking-wider text-paper-muted dark:text-dark-muted mb-1.5"
+          >
+            Descripción / Crítica Literaria * (mínimo 10 caracteres)
+          </label>
+          <textarea
+            id="descripcion"
+            name="descripcion"
+            rows="4"
+            placeholder="Escribe tu opinión crítica fundamentada sobre la trama, personajes y estilo del libro..."
+            value={formData.descripcion}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            disabled={isSubmitting}
+            className={`w-full px-4 py-2.5 rounded-xl border text-sm transition-colors bg-paper-surface dark:bg-dark-surface text-paper-text dark:text-dark-text focus:outline-none focus:ring-2 resize-y ${
+              errors.descripcion
+                ? 'border-rose-500 focus:ring-rose-400'
+                : 'border-paper-border dark:border-dark-border focus:ring-accent/50 focus:border-accent'
+            }`}
+          />
+          <div className="flex justify-between items-center mt-1">
+            {errors.descripcion ? (
+              <p className="text-xs text-rose-500 font-medium">{errors.descripcion}</p>
+            ) : (
+              <span />
+            )}
+            <span className="text-[11px] text-paper-dim dark:text-dark-dim">
+              {formData.descripcion.length} caracteres
+            </span>
+          </div>
+        </div>
       </div>
-    </div>
+
+      {/* Botón de Envío */}
+      <div className="pt-3 border-t border-paper-border dark:border-dark-border flex justify-end">
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className={`font-bold px-8 py-3 rounded-full text-sm transition-all duration-300 flex items-center gap-2 shadow-md ${
+            isSubmitting
+              ? 'bg-accent/60 cursor-not-allowed text-[#141312]'
+              : 'bg-accent hover:bg-accent-hover text-[#141312] hover:shadow-lg active:scale-95'
+          }`}
+        >
+          {isSubmitting ? (
+            <>
+              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-[#141312]" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+              </svg>
+              Guardando en servidor...
+            </>
+          ) : (
+            'Publicar Reseña'
+          )}
+        </button>
+      </div>
+    </form>
   )
 }
