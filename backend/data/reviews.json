@@ -1,5 +1,33 @@
 [
   {
+    "id": "58d9af1f-a8b8-44a1-8513-59a0391cfb97",
+    "libro": "Rayuela",
+    "autorLibro": "Julio Cortázar",
+    "nombre": "Danilot",
+    "email": "dani58@gmail.com",
+    "genero": "Ficción",
+    "fecha": "2026-10-15",
+    "calificacion": 3,
+    "descripcion": "buen libro.",
+    "portada": "https://covers.openlibrary.org/b/id/1047466-M.jpg",
+    "libroId": "05cfa97b-ffaa-4e63-80d2-c1140d904daa",
+    "createdAt": "2026-10-15T05:53:51.440Z"
+  },
+  {
+    "id": "a68cc679-0367-4b2f-9ac5-20e956efb8d4",
+    "libro": "Rich Dad, Poor Dad",
+    "autorLibro": "Robert T. Kiyosaki",
+    "nombre": "Francisco Arias",
+    "email": "franciscoarias108@gmail.com",
+    "genero": "Desarrollo Personal",
+    "fecha": "2026-10-15",
+    "calificacion": 4,
+    "descripcion": "Buena historia.",
+    "portada": "https://covers.openlibrary.org/b/id/8315603-M.jpg",
+    "libroId": "/works/OL2010879W",
+    "createdAt": "2026-10-15T05:52:40.472Z"
+  },
+  {
     "id": "e980bd3a-5884-4511-9608-238a952b6a50",
     "libro": "Latidos que no dije",
     "autorLibro": "Roos",
@@ -93,8 +121,8 @@
     "fecha": "2026-10-13",
     "calificacion": 5,
     "descripcion": "Una lectura imprescindible y laberíntica que desafía las convenciones de la novela.",
-    "portada": null,
-    "libroId": null,
+    "portada": "https://covers.openlibrary.org/b/id/1047466-M.jpg",
+    "libroId": "05cfa97b-ffaa-4e63-80d2-c1140d904daa",
     "createdAt": "2026-10-15T04:43:16.996Z"
   },
   {
