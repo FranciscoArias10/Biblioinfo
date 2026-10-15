@@ -1,5 +1,19 @@
 [
   {
+    "id": "05cfa97b-ffaa-4e63-80d2-c1140d904daa",
+    "libro": "Rayuela",
+    "autorLibro": "Julio Cortazar",
+    "nombre": "Gabriel Garcia",
+    "email": "gabriel@biblioinfo.com",
+    "genero": "Ficción",
+    "fecha": "2023-10-15",
+    "calificacion": 5,
+    "descripcion": "Una lectura imprescindible y laberintica que desafia las convenciones de la novela.",
+    "portada": null,
+    "libroId": null,
+    "createdAt": "2026-10-15T04:43:16.996Z"
+  },
+  {
     "id": "9d51fd3d-d42f-4729-818a-57648e8c7f95",
     "libro": "El Nombre de la Rosa",
     "autorLibro": "Umberto Eco",

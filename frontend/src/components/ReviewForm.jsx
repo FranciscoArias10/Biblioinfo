@@ -4,18 +4,24 @@ import StarRating from './form/StarRating'
 import BookCoverPreview from './BookCoverPreview'
 import { GENRES_OPTIONS, validateField, validateReviewForm } from '../utils/reviewValidator'
 
-export default function ReviewForm({ onSubmit, isSubmitting = false }) {
+export default function ReviewForm({
+  onSubmit,
+  isSubmitting = false,
+  initialData = {},
+}) {
   const today = new Date().toISOString().split('T')[0]
 
   const [formData, setFormData] = useState({
-    libro: '',
-    autorLibro: '',
-    nombre: '',
-    email: '',
-    genero: '',
-    fecha: today,
-    calificacion: 0,
-    descripcion: '',
+    libro: initialData.libro || '',
+    autorLibro: initialData.autorLibro || '',
+    nombre: initialData.nombre || '',
+    email: initialData.email || '',
+    genero: initialData.genero || '',
+    fecha: initialData.fecha || today,
+    calificacion: Number(initialData.calificacion) || 0,
+    descripcion: initialData.descripcion || '',
+    portada: initialData.portada || null,
+    libroId: initialData.libroId || null,
   })
 
   const [errors, setErrors] = useState({})

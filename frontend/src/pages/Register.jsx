@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import ReviewForm from '../components/ReviewForm'
@@ -7,10 +7,12 @@ import AlertMessage from '../components/AlertMessage'
 import { createReview } from '../services/api'
 
 export default function Register() {
-  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const initialBook = searchParams.get('libro') || ''
+
   const [feedback, setFeedback] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [createdReview, setCreatedReview] = useState(null)
+  const [, setCreatedReview] = useState(null)
 
   const handleFormSubmit = async (formData) => {
     setIsSubmitting(true)
@@ -18,7 +20,7 @@ export default function Register() {
 
     try {
       const response = await createReview(formData)
-      const reviewData = response.review || response
+      const reviewData = response.review || response.data || response
 
       setCreatedReview(reviewData)
       setFeedback({
@@ -53,6 +55,15 @@ export default function Register() {
       <Navbar />
 
       <main className="flex-1 max-w-[1240px] w-full mx-auto px-4 sm:px-6 py-10 sm:py-14 flex flex-col gap-8">
+        {/* Breadcrumbs */}
+        <div className="flex items-center gap-2 text-xs font-bold text-accent tracking-wider uppercase">
+          <Link to="/" className="hover:underline">
+            Inicio
+          </Link>
+          <span>/</span>
+          <span className="text-paper-muted dark:text-dark-muted">Publicar</span>
+        </div>
+
         {/* Encabezado de la Página */}
         <div className="flex flex-col gap-3 text-center sm:text-left">
           <div className="flex items-center gap-2 self-center sm:self-start">
@@ -111,7 +122,11 @@ export default function Register() {
 
         {/* Formulario Controlado */}
         {(!feedback || feedback.type !== 'success') && (
-          <ReviewForm onSubmit={handleFormSubmit} isSubmitting={isSubmitting} />
+          <ReviewForm
+            onSubmit={handleFormSubmit}
+            isSubmitting={isSubmitting}
+            initialData={{ libro: initialBook }}
+          />
         )}
       </main>
 
