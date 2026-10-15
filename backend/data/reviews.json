@@ -1,5 +1,61 @@
 [
   {
+    "id": "e980bd3a-5884-4511-9608-238a952b6a50",
+    "libro": "Latidos que no dije",
+    "autorLibro": "Roos",
+    "nombre": "Francisco Arias",
+    "email": "franciscoarias108@gmail.com",
+    "genero": "Ciencia Ficción",
+    "fecha": "2026-10-15",
+    "calificacion": 3,
+    "descripcion": "lo lei me gusto mucho",
+    "portada": "https://covers.openlibrary.org/b/id/13161561-M.jpg",
+    "libroId": "ab9b4576-7596-4db5-aeee-de13a43032ba",
+    "createdAt": "2026-10-15T05:50:59.864Z"
+  },
+  {
+    "id": "a2d3ef2c-9d10-4fc2-99ad-bbe1f94399a1",
+    "libro": "Dune",
+    "autorLibro": "Frank Herbert",
+    "nombre": "Francisco Arias",
+    "email": "franciscoarias108@gmail.com",
+    "genero": "Ciencia Ficción",
+    "fecha": "2026-10-15",
+    "calificacion": 4,
+    "descripcion": "buen libro no me gusto el final",
+    "portada": "https://covers.openlibrary.org/b/id/11481354-M.jpg",
+    "libroId": "/works/OL893414W",
+    "createdAt": "2026-10-15T05:47:23.635Z"
+  },
+  {
+    "id": "8824fa03-a985-4795-b380-8789a4548f32",
+    "libro": "La sombra del viento",
+    "autorLibro": "Carlos Ruiz Zafón",
+    "nombre": "Francisco Arias",
+    "email": "franciscoarias108@gmail.com",
+    "genero": "Misterio",
+    "fecha": "2026-10-15",
+    "calificacion": 4,
+    "descripcion": "buen libro me gusto el final",
+    "portada": "https://covers.openlibrary.org/b/id/10107644-M.jpg",
+    "libroId": "/works/OL278437W",
+    "createdAt": "2026-10-15T05:46:19.192Z"
+  },
+  {
+    "id": "8dabd4a8-7934-4cec-8b91-b0b0028ae964",
+    "libro": "Atomic Habits",
+    "autorLibro": "James Clear",
+    "nombre": "juan",
+    "email": "juanpt@gmail.com",
+    "genero": "Desarrollo Personal",
+    "fecha": "2026-10-15",
+    "calificacion": 4,
+    "descripcion": "buen libro",
+    "portada": "https://covers.openlibrary.org/b/id/12539702-M.jpg",
+    "libroId": "/works/OL17930368W",
+    "createdAt": "2026-10-15T05:42:11.993Z"
+  },
+  {
     "id": "78c72861-a43c-4834-91f8-e71591b0add6",
     "libro": "Cien años de soledad",
     "autorLibro": "Gabriel García Márquez",
@@ -23,8 +79,8 @@
     "fecha": "2026-10-09",
     "calificacion": 3,
     "descripcion": "Buen libro de romance con una buena historia sobre el autodescubrimiento y el amor.",
-    "portada": null,
-    "libroId": null,
+    "portada": "https://covers.openlibrary.org/b/id/13161561-M.jpg",
+    "libroId": "ab9b4576-7596-4db5-aeee-de13a43032ba",
     "createdAt": "2026-10-15T04:49:59.410Z"
   },
   {
@@ -121,8 +177,8 @@
     "fecha": "2026-10-09",
     "calificacion": 5,
     "descripcion": "Monumental construcción de mundo. La ecología de Arrakis, la política interplanetaria y el misticismo se entrelazan de una forma que aún hoy no ha sido superada.",
-    "portada": null,
-    "libroId": null,
+    "portada": "https://covers.openlibrary.org/b/id/11481354-M.jpg",
+    "libroId": "/works/OL893414W",
     "createdAt": "2026-10-09T13:00:00.000Z"
   },
   {
@@ -135,8 +191,8 @@
     "fecha": "2026-10-11",
     "calificacion": 4,
     "descripcion": "Una obra maestra indiscutible, aunque el ritmo en los primeros capítulos exige bastante paciencia al lector debido a la gran cantidad de terminología propia.",
-    "portada": null,
-    "libroId": null,
+    "portada": "https://covers.openlibrary.org/b/id/11481354-M.jpg",
+    "libroId": "/works/OL893414W",
     "createdAt": "2026-10-11T16:00:00.000Z"
   },
   {
@@ -149,8 +205,8 @@
     "fecha": "2026-10-06",
     "calificacion": 5,
     "descripcion": "El Cementerio de los Libros Olvidados es el sueño de cualquier amante de la literatura. Una carta de amor a los libros envuelta en un misterio gótico fascinante.",
-    "portada": null,
-    "libroId": null,
+    "portada": "https://covers.openlibrary.org/b/id/10107644-M.jpg",
+    "libroId": "/works/OL278437W",
     "createdAt": "2026-10-06T19:20:00.000Z"
   },
   {
@@ -163,8 +219,8 @@
     "fecha": "2026-10-10",
     "calificacion": 5,
     "descripcion": "Barcelona en los años 40 se convierte en un personaje más. Fermín Romero de Torres tiene los mejores diálogos que he leído en mucho tiempo.",
-    "portada": null,
-    "libroId": null,
+    "portada": "https://covers.openlibrary.org/b/id/10107644-M.jpg",
+    "libroId": "/works/OL278437W",
     "createdAt": "2026-10-10T11:45:00.000Z"
   },
   {

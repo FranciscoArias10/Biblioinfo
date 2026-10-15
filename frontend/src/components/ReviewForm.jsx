@@ -4,6 +4,8 @@ import StarRating from './form/StarRating'
 import BookCoverPreview from './BookCoverPreview'
 import { GENRES_OPTIONS, validateField, validateReviewForm } from '../utils/reviewValidator'
 import { searchBooks } from '../services/bookSearch'
+import { getReviews } from '../services/api'
+import { getBookPalette } from '../utils/palette'
 
 export default function ReviewForm({
   onSubmit,
@@ -28,12 +30,58 @@ export default function ReviewForm({
   const [errors, setErrors] = useState({})
   const [touched, setTouched] = useState({})
 
-  // Estado para la búsqueda y autocompletado con Google Books
+  // Estado para la búsqueda y autocompletado (libros locales de la web + Google Books)
+  const [localBooks, setLocalBooks] = useState([])
   const [suggestions, setSuggestions] = useState([])
   const [isSearching, setIsSearching] = useState(false)
   const [showDropdown, setShowDropdown] = useState(false)
   const searchTimeoutRef = useRef(null)
   const dropdownRef = useRef(null)
+
+  // Carga inicial de todos los libros que ya están registrados en la web
+  useEffect(() => {
+    let isMounted = true
+    async function loadPlatformBooks() {
+      try {
+        const data = await getReviews()
+        if (isMounted && Array.isArray(data)) {
+          const map = new Map()
+          for (const r of data) {
+            const rawTitle = (r.libro || r.title || '').trim()
+            if (!rawTitle) continue
+            const key = rawTitle.toLowerCase()
+            if (!map.has(key)) {
+              map.set(key, {
+                id: r.libroId || r.id,
+                title: rawTitle,
+                author: (r.autorLibro || r.author || r.bookAuthor || '').trim(),
+                category: r.genero || r.genre || '',
+                suggestedGenre: r.genero || r.genre || '',
+                cover: r.portada || null,
+                source: 'Biblioinfo (En la web)',
+                isLocal: true,
+              })
+            } else {
+              const existing = map.get(key)
+              if (!existing.cover && r.portada) {
+                existing.cover = r.portada
+              }
+              if (!existing.author && r.autorLibro) {
+                existing.author = r.autorLibro.trim()
+              }
+            }
+          }
+          setLocalBooks(Array.from(map.values()))
+        }
+      } catch (err) {
+        console.warn('Error precargando libros de la plataforma:', err)
+      }
+    }
+    loadPlatformBooks()
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   // Cierra el menú desplegable al hacer clic fuera del componente
   useEffect(() => {
@@ -89,21 +137,31 @@ export default function ReviewForm({
       return
     }
 
+    // Coincidencias instantáneas en libros ya registrados en nuestra web
+    const norm = value.toLowerCase().trim()
+    const instantLocal = localBooks.filter(
+      (b) =>
+        b.title.toLowerCase().includes(norm) ||
+        (b.author && b.author.toLowerCase().includes(norm))
+    )
+    if (instantLocal.length > 0) {
+      setSuggestions(instantLocal)
+      setShowDropdown(true)
+    }
+
     setIsSearching(true)
-    setShowDropdown(true)
 
     searchTimeoutRef.current = setTimeout(async () => {
       try {
-        const results = await searchBooks(value)
+        const results = await searchBooks(value, localBooks)
         setSuggestions(results)
         setShowDropdown(results.length > 0)
       } catch (err) {
         console.error('Error buscando libros:', err)
-        setSuggestions([])
       } finally {
         setIsSearching(false)
       }
-    }, 320)
+    }, 300)
   }
 
   // Al seleccionar una coincidencia de la lista, se autocompleta título, autor, portada y género sugerido
@@ -257,48 +315,74 @@ export default function ReviewForm({
                     </div>
 
                     <div className="divide-y divide-paper-border dark:divide-dark-border">
-                      {suggestions.map((item, idx) => (
-                        <button
-                          key={item.id || idx}
-                          type="button"
-                          onClick={() => handleSelectBook(item)}
-                          className="w-full p-3 flex items-center gap-3.5 hover:bg-accent/10 dark:hover:bg-accent/10 transition-colors text-left cursor-pointer group"
-                        >
-                          {/* Miniatura de portada */}
-                          <div className="w-10 h-14 rounded-md bg-paper-band dark:bg-dark-surface flex-shrink-0 overflow-hidden border border-paper-border dark:border-dark-border flex items-center justify-center shadow-xs">
-                            {item.cover ? (
-                              <img
-                                src={item.cover}
-                                alt={item.title}
-                                className="w-full h-full object-cover"
-                                loading="lazy"
-                              />
-                            ) : (
-                              <span className="text-base text-paper-muted select-none">📖</span>
-                            )}
-                          </div>
+                      {suggestions.map((item, idx) => {
+                        const palette = getBookPalette(item.title, item.suggestedGenre)
+                        return (
+                          <button
+                            key={item.id || idx}
+                            type="button"
+                            onClick={() => handleSelectBook(item)}
+                            className="w-full p-3 flex items-center gap-3.5 hover:bg-accent/10 dark:hover:bg-accent/10 transition-colors text-left cursor-pointer group"
+                          >
+                            {/* Miniatura de portada (foto oficial o portada estilizada con paleta de color) */}
+                            <div className="w-10 h-14 rounded-md bg-paper-band dark:bg-dark-surface flex-shrink-0 overflow-hidden border border-paper-border dark:border-dark-border flex items-center justify-center shadow-xs">
+                              {item.cover ? (
+                                <img
+                                  src={item.cover}
+                                  alt={item.title}
+                                  className="w-full h-full object-cover"
+                                  loading="lazy"
+                                />
+                              ) : (
+                                <div
+                                  style={{ backgroundColor: palette.bg, color: palette.fg }}
+                                  className="w-full h-full flex flex-col justify-between p-1 select-none text-[8px] font-bold border-l-2 border-black/25"
+                                  title="Libro registrado en la web con portada tipográfica"
+                                >
+                                  <span className="text-[9px] opacity-75">📖</span>
+                                  <span className="line-clamp-2 text-[7px] leading-tight font-serif break-words">
+                                    {item.title}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
 
-                          {/* Datos del libro */}
-                          <div className="flex flex-col min-w-0 flex-1">
-                            <span className="font-serif font-black text-sm text-paper-text dark:text-dark-text truncate group-hover:text-accent transition-colors">
-                              {item.title}
-                            </span>
-                            <span className="text-xs text-paper-muted dark:text-dark-muted truncate">
-                              {item.author ? `Por ${item.author}` : 'Autor no especificado'}
-                            </span>
-                            {item.suggestedGenre && (
-                              <span className="inline-block mt-1 text-[10px] font-bold text-accent">
-                                Género: {item.suggestedGenre}
+                            {/* Datos del libro */}
+                            <div className="flex flex-col min-w-0 flex-1">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="font-serif font-black text-sm text-paper-text dark:text-dark-text truncate group-hover:text-accent transition-colors">
+                                  {item.title}
+                                </span>
+                                {item.isLocal && (
+                                  <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-accent/20 text-accent-dark dark:text-accent border border-accent/30 flex-shrink-0">
+                                    En la web
+                                  </span>
+                                )}
+                              </div>
+                              <span className="text-xs text-paper-muted dark:text-dark-muted truncate">
+                                {item.author ? `Por ${item.author}` : 'Autor no especificado'}
                               </span>
-                            )}
-                          </div>
+                              <div className="flex items-center gap-2 mt-1">
+                                {item.suggestedGenre && (
+                                  <span className="inline-block text-[10px] font-bold text-accent">
+                                    {item.suggestedGenre}
+                                  </span>
+                                )}
+                                {item.isLocal && !item.cover && (
+                                  <span className="text-[10px] text-paper-muted/80 dark:text-dark-muted/70">
+                                    · Sin portada fotográfica
+                                  </span>
+                                )}
+                              </div>
+                            </div>
 
-                          <div className="flex-shrink-0 text-accent font-bold text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                            <span>Autocompletar</span>
-                            <span>→</span>
-                          </div>
-                        </button>
-                      ))}
+                            <div className="flex-shrink-0 text-accent font-bold text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                              <span>Autocompletar</span>
+                              <span>→</span>
+                            </div>
+                          </button>
+                        )
+                      })}
                     </div>
 
                     <div className="p-2.5 bg-paper-band/50 dark:bg-dark-surface/40 text-[11px] text-paper-muted dark:text-dark-muted text-center border-t border-paper-border dark:border-dark-border">
