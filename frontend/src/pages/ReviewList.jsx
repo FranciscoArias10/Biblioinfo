@@ -85,6 +85,9 @@ export default function ReviewList() {
   const searchQuery = searchParams.get('q') || ''
   const selectedGenre = searchParams.get('genero') || ''
 
+  // Estado local del input: refleja exactamente lo que el usuario escribe (incluyendo espacios intermedios)
+  const [inputValue, setInputValue] = useState(searchQuery)
+
   const [reviews, setReviews] = useState([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -172,6 +175,9 @@ export default function ReviewList() {
   }, [reviews, searchQuery, selectedGenre])
 
   const handleSearchChange = (val) => {
+    // Actualizar el input visualmente con el valor exacto (con espacios)
+    setInputValue(val)
+    // Actualizar la URL con el valor trimmed para el filtrado
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev)
       if (!val.trim()) {
@@ -239,12 +245,12 @@ export default function ReviewList() {
           </svg>
           <input
             type="text"
-            value={searchQuery}
+            value={inputValue}
             onChange={(e) => handleSearchChange(e.target.value)}
             placeholder="Buscar por nombre del libro o autor..."
             className="w-full pl-12 pr-11 py-3.5 rounded-full border border-paper-borderStrong dark:border-dark-borderStrong bg-paper-surface dark:bg-dark-surface text-paper-text dark:text-dark-text text-sm sm:text-base shadow-sm focus:outline-none focus:ring-2 focus:ring-accent transition-all"
           />
-          {searchQuery && (
+          {inputValue && (
             <button
               type="button"
               onClick={() => handleSearchChange('')}
