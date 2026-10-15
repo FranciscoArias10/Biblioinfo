@@ -257,9 +257,11 @@ export default function ReviewForm({
                   <span>Título del Libro</span>
                   <span className="text-accent">*</span>
                   {formData.portada && (
-                    <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 flex items-center gap-1">
-                      <span>✓</span>
-                      <span>Portada vinculada</span>
+                    <span
+                      title="Portada vinculada"
+                      className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/15 w-4 h-4 rounded-full border border-emerald-500/30 inline-flex items-center justify-center shrink-0"
+                    >
+                      ✓
                     </span>
                   )}
                 </label>
