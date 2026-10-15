@@ -32,3 +32,6 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+
+# Archivos de notas y resumen local individual
+RESUMEN_TRABAJO_DARLY.txt

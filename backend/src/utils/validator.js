@@ -23,7 +23,9 @@ export function validateReview(data) {
     genero,
     fecha,
     calificacion,
-    descripcion
+    descripcion,
+    portada,
+    libroId
   } = data;
 
   // Validación: Título del libro
@@ -52,26 +54,20 @@ export function validateReview(data) {
     errors.push('El género o categoría literaria es obligatorio.');
   }
 
-  // Validación: Fecha
+  // Validación: Fecha (formato AAAA-MM-DD, el mismo que envía <input type="date">)
   if (!fecha || typeof fecha !== 'string') {
     errors.push('La fecha de la reseña es obligatoria.');
-  } else {
-    const parsedDate = new Date(fecha);
-    if (isNaN(parsedDate.getTime())) {
-      errors.push('La fecha proporcionada tiene un formato no válido.');
-    } else {
-      // Validar que la fecha no sea futura (permitiendo hasta hoy con margen horario)
-      const today = new Date();
-      today.setHours(23, 59, 59, 999);
-      if (parsedDate > today) {
-        errors.push('La fecha de la reseña no puede ser futura.');
-      }
-    }
+  } else if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha.trim()) || isNaN(new Date(fecha.trim()).getTime()) || new Date(fecha.trim()).toISOString().slice(0, 10) !== fecha.trim()) {
+    errors.push('La fecha proporcionada tiene un formato no válido (use AAAA-MM-DD).');
+  } else if (fecha.trim() > getLocalToday()) {
+    // Se compara como texto AAAA-MM-DD contra la fecha local de hoy.
+    // new Date('2026-10-13') se interpreta en UTC y en Ecuador (UTC-5) dejaba pasar la fecha de mañana.
+    errors.push('La fecha de la reseña no puede ser futura.');
   }
 
   // Validación: Calificación (1 a 5 estrellas)
   const numericRating = Number(calificacion);
-  if (calificacion !== undefined && (isNaN(numericRating) || numericRating < 1 || numericRating > 5)) {
+  if (calificacion !== undefined && (!Number.isInteger(numericRating) || numericRating < 1 || numericRating > 5)) {
     errors.push('La calificación debe ser un número entero entre 1 y 5 estrellas.');
   }
 
@@ -80,8 +76,48 @@ export function validateReview(data) {
     errors.push('La descripción de la reseña es obligatoria y debe tener al menos 10 caracteres.');
   }
 
+  // Validación: Portada (opcional). Llega solo si el usuario eligió un libro del catálogo externo.
+  // Se guarda únicamente el enlace a la imagen, nunca la imagen en sí.
+  if (portada !== undefined && portada !== null && portada !== '') {
+    if (typeof portada !== 'string' || portada.trim().length > 1500 || !isHttpsUrl(portada.trim())) {
+      errors.push('La portada debe ser un enlace https válido a una imagen.');
+    }
+  }
+
+  // Validación: Identificador del libro en el catálogo externo (opcional)
+  if (libroId !== undefined && libroId !== null && libroId !== '') {
+    if (typeof libroId !== 'string' || libroId.trim().length > 100) {
+      errors.push('El identificador del libro no es válido.');
+    }
+  }
+
   return {
     isValid: errors.length === 0,
     errors
   };
+}
+
+/**
+ * Devuelve la fecha local de hoy en formato AAAA-MM-DD.
+ * @returns {string}
+ */
+function getLocalToday() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+/**
+ * Comprueba que un texto sea un enlace https bien formado.
+ * @param {string} value
+ * @returns {boolean}
+ */
+function isHttpsUrl(value) {
+  try {
+    return new URL(value).protocol === 'https:';
+  } catch {
+    return false;
+  }
 }
