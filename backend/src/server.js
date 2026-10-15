@@ -51,6 +51,15 @@ app.use((req, res) => {
 
 // Manejador global de errores no capturados (500)
 app.use((err, req, res, next) => {
+  // JSON mal formado en el cuerpo de la petición: es un error del cliente (400), no del servidor
+  if (err.type === 'entity.parse.failed') {
+    return res.status(400).json({
+      success: false,
+      message: 'El cuerpo de la solicitud no es un JSON válido',
+      errors: ['Revise el formato JSON enviado (comillas, comas y llaves).']
+    });
+  }
+
   console.error('[server error]', err);
   res.status(500).json({
     success: false,
