@@ -1,5 +1,19 @@
 [
   {
+    "id": "ddb38f2d-3549-491c-b7e8-1ae0b657f7d1",
+    "libro": "El principito",
+    "autorLibro": "Antoine de Saint-Exupéry",
+    "nombre": "Francisco Arias",
+    "email": "franciscoarias108@gmail.com",
+    "genero": "Ficción",
+    "fecha": "2026-10-15",
+    "calificacion": 4,
+    "descripcion": "LA rosa es el mejor personaje del libro.",
+    "portada": "https://covers.openlibrary.org/b/id/13499066-M.jpg",
+    "libroId": "rev-principito",
+    "createdAt": "2026-10-15T05:57:33.985Z"
+  },
+  {
     "id": "58d9af1f-a8b8-44a1-8513-59a0391cfb97",
     "libro": "Rayuela",
     "autorLibro": "Julio Cortázar",
@@ -303,8 +317,8 @@
     "fecha": "2026-10-04",
     "calificacion": 5,
     "descripcion": "Lo esencial es invisible a los ojos. Cada relectura revela una capa distinta que te interpela según el momento de tu vida. Poesía pura.",
-    "portada": null,
-    "libroId": null,
+    "portada": "https://covers.openlibrary.org/b/id/13499066-M.jpg",
+    "libroId": "rev-principito",
     "createdAt": "2026-10-04T12:00:00.000Z"
   },
   {
