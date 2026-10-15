@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { readReviews, writeReviews } from '../utils/fileHandler.js';
+import { readReviews, addReview } from '../utils/fileHandler.js';
 import { validateReview } from '../utils/validator.js';
 
 /**
@@ -62,10 +62,8 @@ export async function createReview(req, res) {
       createdAt: new Date().toISOString()
     };
 
-    // Lectura, agregación y persistencia en reviews.json
-    const currentReviews = await readReviews();
-    currentReviews.unshift(newReview); // Agregar al inicio para que las más recientes aparezcan primero
-    await writeReviews(currentReviews);
+    // Persistencia en reviews.json mediante la cola de escrituras
+    await addReview(newReview);
 
     return res.status(201).json({
       success: true,

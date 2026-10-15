@@ -52,26 +52,20 @@ export function validateReview(data) {
     errors.push('El género o categoría literaria es obligatorio.');
   }
 
-  // Validación: Fecha
+  // Validación: Fecha (formato AAAA-MM-DD, el mismo que envía <input type="date">)
   if (!fecha || typeof fecha !== 'string') {
     errors.push('La fecha de la reseña es obligatoria.');
-  } else {
-    const parsedDate = new Date(fecha);
-    if (isNaN(parsedDate.getTime())) {
-      errors.push('La fecha proporcionada tiene un formato no válido.');
-    } else {
-      // Validar que la fecha no sea futura (permitiendo hasta hoy con margen horario)
-      const today = new Date();
-      today.setHours(23, 59, 59, 999);
-      if (parsedDate > today) {
-        errors.push('La fecha de la reseña no puede ser futura.');
-      }
-    }
+  } else if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha.trim()) || isNaN(new Date(fecha.trim()).getTime())) {
+    errors.push('La fecha proporcionada tiene un formato no válido (use AAAA-MM-DD).');
+  } else if (fecha.trim() > getLocalToday()) {
+    // Se compara como texto AAAA-MM-DD contra la fecha local de hoy.
+    // new Date('2026-10-13') se interpreta en UTC y en Ecuador (UTC-5) dejaba pasar la fecha de mañana.
+    errors.push('La fecha de la reseña no puede ser futura.');
   }
 
   // Validación: Calificación (1 a 5 estrellas)
   const numericRating = Number(calificacion);
-  if (calificacion !== undefined && (isNaN(numericRating) || numericRating < 1 || numericRating > 5)) {
+  if (calificacion !== undefined && (!Number.isInteger(numericRating) || numericRating < 1 || numericRating > 5)) {
     errors.push('La calificación debe ser un número entero entre 1 y 5 estrellas.');
   }
 
@@ -84,4 +78,16 @@ export function validateReview(data) {
     isValid: errors.length === 0,
     errors
   };
+}
+
+/**
+ * Devuelve la fecha local de hoy en formato AAAA-MM-DD.
+ * @returns {string}
+ */
+function getLocalToday() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }

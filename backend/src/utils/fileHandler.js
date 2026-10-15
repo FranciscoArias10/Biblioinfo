@@ -56,9 +56,33 @@ export async function writeReviews(reviews) {
   try {
     await ensureDataFileExists();
     const jsonString = JSON.stringify(reviews, null, 2);
-    await fs.writeFile(DATA_FILE, jsonString, 'utf-8');
+    const tempFile = `${DATA_FILE}.tmp`;
+    await fs.writeFile(tempFile, jsonString, 'utf-8');
+    await fs.rename(tempFile, DATA_FILE);
   } catch (error) {
     console.error('[fileHandler] Error escribiendo en reviews.json:', error);
     throw new Error('No se pudo guardar la información en el almacenamiento');
   }
+}
+
+// Cola de escrituras: cada guardado espera a que termine el anterior.
+// Evita que dos POST simultáneos lean el mismo archivo y uno sobrescriba al otro.
+let writeQueue = Promise.resolve();
+
+/**
+ * Agrega una reseña al inicio de la lista y la guarda en disco,
+ * de una en una, sin perder las reseñas anteriores.
+ * @param {Object} review Reseña ya validada.
+ * @returns {Promise<Object>} La reseña guardada.
+ */
+export function addReview(review) {
+  const task = writeQueue.then(async () => {
+    const reviews = await readReviews();
+    reviews.unshift(review); // Las más recientes primero
+    await writeReviews(reviews);
+    return review;
+  });
+  // Si un guardado falla, la cola sigue funcionando para los siguientes
+  writeQueue = task.catch(() => {});
+  return task;
 }
