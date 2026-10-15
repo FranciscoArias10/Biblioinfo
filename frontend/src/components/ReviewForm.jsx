@@ -173,7 +173,7 @@ export default function ReviewForm({
               onBlur={handleBlur}
               error={errors.nombre}
               touched={touched.nombre}
-              placeholder="ej. Darly Farias"
+              placeholder="ej. Tu Nombre / Apodo"
               disabled={isSubmitting}
             />
 
