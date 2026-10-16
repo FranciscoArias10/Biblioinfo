@@ -6,6 +6,7 @@ import BookCover from '../components/BookCover'
 import Spinner from '../components/Spinner'
 import { getReviews, INITIAL_REVIEWS } from '../services/api'
 import { getBookPalette } from '../utils/palette'
+import { useSEO } from '../utils/seo'
 
 export default function BookDetail() {
   const { id } = useParams()
@@ -96,6 +97,19 @@ export default function BookDetail() {
       reviews: matchedReviews,
     }
   }, [id, reviews])
+
+  useSEO({
+    title: bookData
+      ? `${bookData.title} de ${bookData.author} — Reseñas y Calificaciones`
+      : 'Ficha y Reseñas del Libro — Biblioinfo',
+    description: bookData
+      ? `Consulta opiniones y críticas literarias de "${bookData.title}" (${bookData.genre}) por ${bookData.author}. Calificación promedio: ${bookData.averageRating} estrellas.`
+      : 'Detalles del libro y críticas literarias en Biblioinfo.',
+    keywords: bookData
+      ? `${bookData.title}, ${bookData.author}, ${bookData.genre}, reseñas de libros, Biblioinfo`
+      : 'reseñas de libros, ficha de libro',
+    canonical: `http://localhost:5173/libro/${encodeURIComponent(id || '')}`,
+  })
 
   return (
     <div className="min-h-screen bg-paper-bg dark:bg-dark-bg text-paper-text dark:text-dark-text transition-colors duration-300 flex flex-col font-sans">

@@ -5,8 +5,16 @@ import Footer from '../components/Footer'
 import ReviewForm from '../components/ReviewForm'
 import AlertMessage from '../components/AlertMessage'
 import { createReview } from '../services/api'
+import { useSEO } from '../utils/seo'
 
 export default function Register() {
+  useSEO({
+    title: 'Escribir una Reseña Literaria — Biblioinfo',
+    description: 'Publica tu opinión y calificación sobre cualquier obra literaria. Formulario interactivo con validaciones y persistencia en Biblioinfo.',
+    keywords: 'publicar reseña, formulario de libro, escribir opinión literaria, calificar libro, Biblioinfo',
+    canonical: 'http://localhost:5173/registro',
+  })
+
   const [searchParams] = useSearchParams()
   const initialBook = searchParams.get('libro') || ''
 

@@ -6,8 +6,16 @@ import Footer from '../components/Footer'
 import BookCover from '../components/BookCover'
 import ReviewCard from '../components/ReviewCard'
 import { getReviews, INITIAL_REVIEWS } from '../services/api'
+import { useSEO } from '../utils/seo'
 
 export default function Home() {
+  useSEO({
+    title: 'Biblioinfo — Descubre tu próxima lectura a través de ojos apasionados',
+    description: 'Plataforma interactiva de reseñas literarias. Explora recomendaciones de libros, clásicos que siguen dando de qué hablar y opiniones de lectores reales.',
+    keywords: 'reseñas de libros, literatura, opiniones de libros, clásicos, catálogo literario, Biblioinfo',
+    canonical: 'http://localhost:5173/',
+  })
+
   const { isDark } = useTheme()
   const navigate = useNavigate()
   const [reviews, setReviews] = useState(INITIAL_REVIEWS.slice(0, 6))

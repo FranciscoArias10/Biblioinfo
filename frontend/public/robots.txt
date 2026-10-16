@@ -1,0 +1,6 @@
+# Robots.txt para Biblioinfo
+User-agent: *
+Allow: /
+
+# Sitemap oficial
+Sitemap: http://localhost:5173/sitemap.xml

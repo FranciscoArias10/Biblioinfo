@@ -6,6 +6,7 @@ import BookCover from '../components/BookCover'
 import Spinner from '../components/Spinner'
 import { getReviews } from '../services/api'
 import { getBookPalette } from '../utils/palette'
+import { useSEO } from '../utils/seo'
 
 /**
  * Group raw review items by book title to calculate averages and collect all reviews per book
@@ -84,6 +85,15 @@ export default function ReviewList() {
   const [searchParams, setSearchParams] = useSearchParams()
   const searchQuery = searchParams.get('q') || ''
   const selectedGenre = searchParams.get('genero') || ''
+
+  useSEO({
+    title: selectedGenre && selectedGenre.toLowerCase() !== 'todos'
+      ? `Reseñas de ${selectedGenre} — Catálogo Biblioinfo`
+      : 'Catálogo de Libros y Reseñas Literarias — Biblioinfo',
+    description: 'Explora y consulta el catálogo completo de libros con calificaciones y opiniones de lectores. Filtra por género o busca por autor en tiempo real.',
+    keywords: 'catálogo de libros, reseñas de libros, estantería de libros, críticas literarias, Biblioinfo',
+    canonical: 'http://localhost:5173/lista',
+  })
 
   // Estado local del input: refleja exactamente lo que el usuario escribe (incluyendo espacios intermedios)
   const [inputValue, setInputValue] = useState(searchQuery)
