@@ -33,16 +33,34 @@ export function validateField(name, value, today = new Date().toISOString().spli
         return 'El título del libro es obligatorio (mínimo 2 letras).'
       }
       break
-    case 'autorLibro':
-      if (!value || String(value).trim().length < 2) {
+    case 'autorLibro': {
+      const trimmed = String(value || '').trim()
+      if (!trimmed || trimmed.length < 2) {
         return 'El autor del libro es obligatorio (mínimo 2 letras).'
       }
-      break
-    case 'nombre':
-      if (!value || String(value).trim().length < 2) {
-        return 'Tu nombre como autor de la reseña es obligatorio.'
+      if (/\d/.test(trimmed)) {
+        return 'El nombre del autor no puede contener números.'
+      }
+      const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'.-]+$/
+      if (!nameRegex.test(trimmed)) {
+        return 'El nombre del autor solo puede contener letras y signos válidos.'
       }
       break
+    }
+    case 'nombre': {
+      const trimmed = String(value || '').trim()
+      if (!trimmed || trimmed.length < 2) {
+        return 'Tu nombre es obligatorio (mínimo 2 letras).'
+      }
+      if (/\d/.test(trimmed)) {
+        return 'Tu nombre no puede contener números.'
+      }
+      const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'.-]+$/
+      if (!nameRegex.test(trimmed)) {
+        return 'Tu nombre solo puede contener letras y signos válidos.'
+      }
+      break
+    }
     case 'email': {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
       if (!value || !emailRegex.test(String(value).trim())) {

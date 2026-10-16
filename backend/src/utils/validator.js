@@ -36,11 +36,15 @@ export function validateReview(data) {
   // Validación: Autor de la obra
   if (!autorLibro || typeof autorLibro !== 'string' || autorLibro.trim().length < 2) {
     errors.push('El autor del libro es obligatorio y debe tener al menos 2 caracteres.');
+  } else if (/\d/.test(autorLibro)) {
+    errors.push('El nombre del autor del libro no puede contener números.');
   }
 
   // Validación: Nombre del reseñador
   if (!nombre || typeof nombre !== 'string' || nombre.trim().length < 2) {
     errors.push('El nombre del autor de la reseña es obligatorio y debe tener al menos 2 caracteres.');
+  } else if (/\d/.test(nombre)) {
+    errors.push('Tu nombre como autor de la reseña no puede contener números.');
   }
 
   // Validación: Formato de correo electrónico

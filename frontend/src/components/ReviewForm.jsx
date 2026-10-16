@@ -103,9 +103,13 @@ export default function ReviewForm({
 
     setFormData((prev) => ({ ...prev, [name]: updatedValue }))
 
-    if (touched[name]) {
+    const hasNumberViolation = (name === 'nombre' || name === 'autorLibro') && /\d/.test(value)
+    if (touched[name] || hasNumberViolation) {
       const errorMsg = validateField(name, updatedValue, today)
       setErrors((prev) => ({ ...prev, [name]: errorMsg }))
+      if (hasNumberViolation) {
+        setTouched((prev) => ({ ...prev, [name]: true }))
+      }
     }
   }
 
@@ -468,14 +472,14 @@ export default function ReviewForm({
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-start">
             <FormField
-              label="Tu Nombre / Apodo"
+              label="Tu Nombre"
               name="nombre"
               value={formData.nombre}
               onChange={handleChange}
               onBlur={handleBlur}
               error={errors.nombre}
               touched={touched.nombre}
-              placeholder="ej. Tu Nombre / Apodo"
+              placeholder="ej. Tu Nombre"
               disabled={isSubmitting}
             />
 
